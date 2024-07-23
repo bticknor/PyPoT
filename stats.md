@@ -16,6 +16,8 @@ Where $x \in [0, \infty)$ for $\xi \geq 0$ and $x \in [0, -\frac{\sigma}{\xi}]$ 
 
 ## Maximum Likelihood Estimation
 
+Letting $\theta = (\xi, \sigma)$, the maximum likelihood estimators minimize the negative log likelihood:
+
 TODO!
 
 ```math
@@ -28,7 +30,7 @@ TODO!
 The maximum product of spacings estimators $\tilde{\xi}$ and $\tilde{\sigma}$ minimize the "Moran's statistic":
 
 ```math
-    M(\theta) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(x_{(i)}) - F_{\xi, \sigma}( x_{(i-1)}  \right)
+    M(\xi, \sigma) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(x_{(i)}) - F_{\xi, \sigma}( x_{(i-1)}  \right)
 ```
 
 Where $x_{(i)}$ is the $i$'th element in the ordered sample, with $x_0 \equiv 0$, and $x_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency (TODO CITE https://arxiv.org/pdf/math/0702830
@@ -49,7 +51,7 @@ Asymptotically, efficient estimators of $\xi$ and $\sigma$ have the following co
         -\sigma(1+\xi) & (1 - \xi^2)
     \end{bmatrix} }
 ```
-This is estimated by setting $\sigma = \hat{\sigma}$ and $\xi = \hat{\xi}$ or $\sigma = \tilde{\sigma}$ and $\xi = \tilde{\xi}$.
+This is estimated by setting $\theta = \hat{\theta}$ or $\theta = \tilde{\theta}$.
 
 TODO CITE
 
