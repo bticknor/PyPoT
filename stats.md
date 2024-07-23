@@ -1,9 +1,9 @@
-# PyPoT 
+# PyPoT Statistical Details 
 
 ## TODO!
 
 ```math
-    a = b \\
-    c = d
+    \displaylines{a = b \\
+     c = d}
 ```
 TODO!
