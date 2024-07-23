@@ -51,7 +51,7 @@ Asymptotically, efficient estimators of $\xi$ and $\sigma$ have the following co
         -\sigma(1+\xi) & (1 - \xi^2)
     \end{bmatrix} }
 ```
-This is estimated by setting $\theta = \hat{\theta}$ or $\theta = \tilde{\theta}$.
+This is estimated by setting $\theta$ to either $\hat{\theta}$ or $\tilde{\theta}$.
 
 TODO CITE
 
