@@ -27,10 +27,10 @@ TODO!
 
 ## Maximum Product of Spacings Estimation
 
-The maximum product of spacings estimators $\tilde{\xi}$ and $\tilde{\sigma}$ minimize the "Moran's statistic":
+The maximum product of spacings estimators minimize the "Moran's statistic":
 
 ```math
-    M(\xi, \sigma) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(x_{(i)}) - F_{\xi, \sigma}( x_{(i-1)}  \right)
+    (\tilde{\xi}, \tilde{\sigma}) = argmin M(\xi, \sigma) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(x_{(i)}) - F_{\xi, \sigma}( x_{(i-1)}  \right)
 ```
 
 Where $x_{(i)}$ is the $i$'th element in the ordered sample, with $x_0 \equiv 0$, and $x_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency (TODO CITE https://arxiv.org/pdf/math/0702830
@@ -51,7 +51,7 @@ Asymptotically, efficient estimators of $\xi$ and $\sigma$ have the following co
         -\sigma(1+\xi) & (1 - \xi^2)
     \end{bmatrix} }
 ```
-This is estimated by setting $\theta$ to either $\hat{\theta}$ or $\tilde{\theta}$.
+This is estimated by setting $\theta$ to either the MLE or MPS estimates.
 
 TODO CITE
 
