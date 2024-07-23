@@ -19,6 +19,10 @@ Where GPD is the Generalized Pareto Distribution with the location parameter fix
 
 This is a statistical library with a very limited scope. Routines for extracting and plotting extreme values can be found in (e.g.) [PyExtremes](https://github.com/georgebv/pyextremes).
 
+## Documentation
+
+Detailed mathematical "documentation" that includes expressions for asymptotic results can be found [here](stats.md).  Example usage of the software can be found TODO!
+
 ## Usage
 
 TODO!
