@@ -19,8 +19,8 @@ Where $x \in [0, \infty)$ for $\xi \geq 0$ and $x \in [0, -\frac{\sigma}{\xi}]$ 
 The maximum likelihood estimators minimize the GPD negative log likelihood:
 
 ```math
-    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -l(\xi, \sigma | X) \\
-    -l(\xi, \sigma | X) = -nlog(\sigma) - (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
+    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -l(\xi, \sigma | x) \\
+    -l(\xi, \sigma | x) = -nlog(\sigma) - (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
 ```
 
 ## Maximum Product of Spacings Estimators
@@ -97,3 +97,9 @@ https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
 
 TODO!
 
+
+TODO CITE:
+
+AUTOMATED THRESHOLD SELECTION FOR EXTREME VALUE
+ANALYSIS VIA ORDERED GOODNESS-OF-FIT TESTS WITH
+ADJUSTMENT FOR FALSE DISCOVERY RATE
