@@ -37,29 +37,7 @@ The maximum product of spacings estimators minimize the "Moran's statistic":
 Where $x_{(i)}$ is the $i$'th element in the ordered sample, with $x_0 \equiv 0$, and $x_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency (TODO CITE https://arxiv.org/pdf/math/0702830
 ).
 
-
-## Asymptotic Covariance Matrix for MLE/MPS Estimators
-
-Asymptotically, efficient estimators of $\xi$ and $\sigma$ have the following covariance matrix:
-
-```math
-     \displaylines{ n \cdot var(\begin{bmatrix}
-        \hat{\sigma}\\
-        \hat{\xi}
-        \end{bmatrix}
-    ) \approx \begin{bmatrix}
-        2 \sigma^2 (1 + \xi) & -\sigma(1 + \xi) \\
-        -\sigma(1+\xi) & (1 - \xi^2)
-    \end{bmatrix} }
-```
-This is estimated by setting $\theta$ to either the MLE or MPS estimates.
-
-TODO CITE
-
-https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
-
-
-## Poisson Process Estimator
+## Poisson Process Parameter Estimator
 
 TODO!
 
@@ -77,7 +55,8 @@ An estimator for the $L$ year return level is:
 
 This is derived from computing the expected time between $L$ year exceedences, given GPD parameter estimates. TODO CITE OUR PAPER
 
-## Approximate Variance for Return Level Estimator
+
+## Approximate Variance for MLE/MPS Estimators and Return Level Estimator
 
 Letting $\theta = (\lambda, \sigma, \xi)$ and assuming independence between $\lambda$ and the GPD parameters, we have the following asymptotic covariance matrix:
 
@@ -89,7 +68,7 @@ Letting $\theta = (\lambda, \sigma, \xi)$ and assuming independence between $\la
     \end{bmatrix}
 ```
 
-Letting $h(\theta) = \widehat{R(L | \theta)}$, we have by the delta method that the asymptotic variance of the return level estimator is:
+Where $T$ is the length of the time series in years and $N(T)$ is the number of exceedences given $T$.  Letting $h(\theta) = \widehat{R(L | \theta)}$, we have by the delta method that the asymptotic variance of the return level estimator is:
 
 ```math
     Var(\widehat{R(L)}) \approx \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)
@@ -110,6 +89,10 @@ The estimate of this is computed as:
 ```math
     \widehat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
 ```
+
+TODO CITE
+
+https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
 
 
 ## Threshold selection
