@@ -63,22 +63,56 @@ https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
 
 TODO!
 
+```math
+    \hat{\lambda} = ...
+```
+
 ## Return Level Estimator
 
 An estimator for the $L$ year return level is:
 
 ```math
-    \hat{R}(L) = \frac{\hat{\sigma}}{\hat{\xi}} \left((\hat{\lambda} L)^{\hat{\xi}} - 1   \right)
+    \widehat{R(L | \hat{\theta})} = \frac{\hat{\sigma}}{\hat{\xi}} \left((\hat{\lambda} L)^{\hat{\xi}} - 1   \right)
 ```
 
 This is derived from computing the expected time between $L$ year exceedences, given GPD parameter estimates. TODO CITE OUR PAPER
 
 ## Approximate Variance for Return Level Estimator
 
-Assuming independence between $\lambda$ and the GPD parameters, we have that:
+Assuming independence between $\lambda$ and the GPD parameters, we have the following asymptotic covariance matrix for $\hat{\lambda}$, $\hat{\sigma}$, and $\hat{\xi}$:
 
-TODO
+```math
+    \Sigma = \begin{bmatrix}
+        \frac{\lambda}{T} & 0 & 0 \\
+        0 & \frac{2 \sigma^2 (1 + \xi)}{N(T)} & \frac{-\sigma(1 + \xi)}{N(T)} \\
+        0 & \frac{-\sigma(1 + \xi)}{N(T)} & \frac{(1 - \xi^2)}{N(T)}
+    \end{bmatrix}
+```
+
+Letting $h(\theta) = \widehat{R(L | \theta)}$, we have by the delta method that the asymptotic variance of the return level estimator is:
+
+```math
+    Var(\widehat{R(L)}) \approx \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)
+```
+
+With:
+
+```math
+    \nabla h(\theta) = \begin{bmatrix}
+        \sigma L^\xi \lambda^{\xi - 1} \\
+        \frac{\sigma}{\xi} (\lambda L)^\xi log(\lambda L) - \left( (\lambda L)^\xi - 1 \right) (\frac{\sigma}{\xi^2}) \\
+        \frac{(\lambda L)^\xi - 1}{\xi}
+    \end{bmatrix}
+```
+
+The estimate of this is computed as:
+
+```math
+    \hat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
+```
 
 
+## Threshold selection
 
 TODO!
+
