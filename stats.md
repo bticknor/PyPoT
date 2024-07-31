@@ -79,7 +79,7 @@ This is derived from computing the expected time between $L$ year exceedences, g
 
 ## Approximate Variance for Return Level Estimator
 
-Assuming independence between $\lambda$ and the GPD parameters, we have the following asymptotic covariance matrix for $\hat{\lambda}$, $\hat{\sigma}$, and $\hat{\xi}$:
+Letting $\theta = (\lambda, \sigma, \xi)$ and assuming independence between $\lambda$ and the GPD parameters, we have the following asymptotic covariance matrix for $\hat{\theta}$:
 
 ```math
     \Sigma = \begin{bmatrix}
@@ -108,7 +108,7 @@ With:
 The estimate of this is computed as:
 
 ```math
-    \hat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
+    \widehat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
 ```
 
 
