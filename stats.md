@@ -16,13 +16,11 @@ Where $x \in [0, \infty)$ for $\xi \geq 0$ and $x \in [0, -\frac{\sigma}{\xi}]$ 
 
 ## Maximum Likelihood Estimators
 
-Letting $\theta = (\xi, \sigma)$, the maximum likelihood estimators minimize the negative log likelihood:
-
-TODO!
+The maximum likelihood estimators minimize the GPD negative log likelihood:
 
 ```math
-    \displaylines{a = b \\
-     c = d}
+    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -l(\xi, \sigma | X) \\
+    -l(\xi, \sigma | X) = -nlog(\sigma) - (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
 ```
 
 ## Maximum Product of Spacings Estimators
