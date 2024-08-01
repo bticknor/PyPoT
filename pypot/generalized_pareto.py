@@ -1,4 +1,7 @@
 import numpy as np
+from scipy.optimize import LinearConstraint
+from scipy.optimize import minimize
+from functools import partial
 
 
 def negative_log_likelihood(x, xi, sigma):
@@ -105,3 +108,118 @@ def param_cov_matrix(theta_hat, n):
     ])
     # normalize
     return n**(-1) * cov_matrix
+
+
+def gpd_neg_loglik_jacob(theta, x):
+    """Jacobian of the GPD negative log likelihood, used
+    in the sequential quadratic programming optimization routine.
+
+    args:
+        theta (array[float]): (xi, sigma) params
+        x (array[float]): data
+    returns:
+        (array[float]) value of the jacobian
+    """
+    xi = theta[0]
+    sigma = theta[1]
+    n = len(x)
+
+    # partial derivatives
+    d_dxi = (1 + 1 / xi) * np.sum(x / (sigma + xi * x)) - np.sum(np.log(1 + xi * x / sigma)) * xi ** (-1 * 2)
+    d_dsigma = n / sigma - (1 + 1 / xi) * np.sum(x * xi / (sigma ** 2 + sigma * x * xi))
+
+    jacob = np.array([d_dxi, d_dsigma])
+    return jacob
+
+
+def gpd_neg_loglik_hess(theta, x):
+    """Hessian of the GPD negative log likelihood, for use in
+    optimization procedures that require it.
+
+    args:
+        theta (array[float]): (xi, sigma) params
+        x (array[float]): data
+    returns:
+        (2x2 array[float]) value of the hessian
+    """
+    xi = theta[0]
+    sigma = theta[1]
+    n = len(x)
+
+    # second order partials
+    # ==================================================
+    # d^2 / dxi^2
+    a1 = np.sum(np.log(1 + xi * x / sigma))
+    a2 = np.sum(x / (sigma + xi * x))
+    a3 = np.sum(x**2 / (sigma + xi * x)**2)
+    d_dxi_sq = (2 / xi**3) * a1 - (2 / xi**2) * a2 - (1 + 1 / xi) * a3
+
+    # d^2 / dsigma^2
+    sum_term = np.sum(xi * x * (2 * sigma + xi * x) / (sigma ** 2 + sigma * xi * x)^2)
+    d_dsigma_sq = (1 + 1 / xi) * sum_term - n / sigma**2
+
+    # d^2 / dxi dsigma
+    s1 = np.sum(xi * x / (sigma**2 + sigma * x * xi))
+    s2 = np.sum(x / (sigma + x * xi)**2)
+    d_dsigma_dxi = 1 / xi**2 * s1 - (1 + 1 / xi) * s2
+
+    hessian = np.array([[d_dxi_sq, d_dsigma_dxi], [d_dsigma_dxi, d_dsigma_sq]])
+    return hessian
+
+
+def fit_GPD(x, theta_0, f_minimize, jacobian=None):
+    """Parameter estimation by objective function minimization,
+    via scipy optimizer.
+
+    x: 1d np array, data values
+    theta_0: 2-tuple[float], initial guess of values
+    f_minimize: callable function with call signature:
+        f_minimize(x, xi, sigma) = r
+    jacobian: callable function with call signature:
+        jacobian([xi, sigma], x), the jacobian of the objective function
+        to minimize
+
+    return: np.array[float] point estimates
+    """
+    # partially apply negative log likelihood at given X values
+    f_partial = partial(f_minimize, x=x)
+
+    # routine to optimize
+    def minimize_me(theta):
+        xi, sigma = theta
+        return f_partial(xi=xi, sigma=sigma)
+
+    # bounds and constraint
+    # =========================================
+    # sigma > 0
+    bounds = [(-1 / 2, 1 / 2), (0.01, None)]
+
+    # constraint on xi
+    # xi > -sigma / max(x)
+    max_x = max(x)
+
+    A = [1, 1 / max_x]
+    lb = 1e-4  # Lower bound of the constraint
+    ub = float('inf')
+
+    lin_constraint = LinearConstraint(A, lb, ub)
+
+    # check if jacobian is provided
+    if jacobian is not None:
+        jacob = partial(jacobian, x=x)
+    else:
+        jacob = None
+
+    # =========================================
+
+    result = minimize(
+        minimize_me,
+        theta_0,
+        bounds=bounds,
+        constraints=[lin_constraint],
+        method="SLSQP",
+        jac=jacob,
+    )
+
+    print(result.message)
+    return result.x

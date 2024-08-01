@@ -105,7 +105,7 @@ TODO CITE
 https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
 
 
-## Threshold selection
+## Threshold Selection
 
 TODO!
 
