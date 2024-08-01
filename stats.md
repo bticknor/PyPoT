@@ -47,11 +47,13 @@ Where $x_{(i)}$ is the $i$'th element in the ordered sample, with $x_0 \equiv 0$
 
 ## Poisson Process Parameter Estimator
 
-TODO!
+The MLE for the parameter governing the Poisson process that generates exceedences is given by:
 
 ```math
-    \hat{\lambda} = ...
+    \hat{\lambda} = \frac{N(T)}{T}
 ```
+
+Where $T$ is the time span of the series in years and $N(T)$ is the number of independent exceedences.
 
 ## Return Level Estimator
 
@@ -76,7 +78,7 @@ Letting $\theta = (\lambda, \sigma, \xi)$ and assuming independence between $\la
     \end{bmatrix}
 ```
 
-Where $T$ is the length of the time series in years and $N(T)$ is the number of exceedences given $T$.  Letting $h(\theta) = \widehat{R(L | \theta)}$, we have by the delta method that the asymptotic variance of the return level estimator is:
+Letting $h(\theta) = \widehat{R(L | \theta)}$, we have by the delta method that the asymptotic variance of the return level estimator is:
 
 ```math
     Var(\widehat{R(L)}) \approx \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)
