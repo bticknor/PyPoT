@@ -26,3 +26,7 @@ Detailed mathematical "documentation" that includes expressions for asymptotic r
 ## Usage
 
 TODO!
+
+## TODOs
+
+- Implement gradient for Moran's statistic for faster fitting of MPS estimators

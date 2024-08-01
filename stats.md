@@ -23,6 +23,16 @@ The maximum likelihood estimators minimize the GPD negative log likelihood:
     -l(\xi, \sigma | x) = -nlog(\sigma) - (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
 ```
 
+The gradient of the GPD negative log likelihood is determined by:
+
+```math
+    \frac{d}{d\xi} [-log(L(\xi, \sigma | x))] = (1 + \frac{1}{\xi}) \left(\sum_{i=1}^n \frac{x_i}{\sigma + \xi x_i}  \right) - \left( \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) \right) \cdot \frac{1}{\xi^2} 
+```
+
+```math
+    \frac{d}{d\sigma} [-log(L(\xi, \sigma | x))] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{x_i \xi}{\sigma^2 + \sigma x_i \xi} \right)
+```
+
 ## Maximum Product of Spacings Estimators
 
 The maximum product of spacings estimators minimize the "Moran's statistic":
