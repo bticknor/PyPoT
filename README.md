@@ -30,3 +30,5 @@ TODO!
 ## TODOs
 
 - Implement gradient for Moran's statistic for faster fitting of MPS estimators
+
+- Implement our own extreme extraction separate from PyExtremes
