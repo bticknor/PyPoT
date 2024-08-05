@@ -31,11 +31,16 @@ def gp_negative_log_likelihood(x, xi, sigma):
 
 
 def gp_cdf(x, xi, sigma):
-    """CDF of the GPD as parameterized by the paper linked above.
+    """CDF of the GPD.
 
-    x is a numpy array
+    args:
+        x (np.array): data
+        xi (numeric): xi parameter
+        sigma (numeric): sigma parameter
+
+    returns:
+        (np.array) values of the cdf at x
     """
-    # SANITY CHECKS
     # make sure that each data point is in the support set
     assert min(x) > 0
     if xi < 0:
@@ -44,6 +49,31 @@ def gp_cdf(x, xi, sigma):
 
     first = (1 + xi * x / sigma)**(-1/xi)
     return 1 - first
+
+
+def gpd_inv_cdf(u, xi, sigma):
+    """Inverse CDF of the GPD as paramaterized by the paper above."""
+    first = (1 - u)**(-1 * xi) - 1
+    second = sigma / xi * first
+    return second
+
+
+def gpd_density(x, xi, sigma):
+    """Density function for GPD.
+
+    args:
+        x (np.array): data
+        xi (numeric): xi parameter
+        sigma (numeric): sigma parameter
+
+    returns:
+        (np.array) values of the density function
+    """
+    # TODO bounds
+    first = 1 + xi * x / sigma
+    second = first ** (-1 - 1/xi)
+    third = 1 / sigma * second
+    return third
 
 
 def gp_morans_statistic(x, xi, sigma):
