@@ -11,6 +11,6 @@ setup(
     install_requires=requirements,
     include_package_data=True,
     package_data={
-        'pypot': ["data/*.csv"],
+        'pypot': ["data/*.csv", "data/*.p"],
     },
 )

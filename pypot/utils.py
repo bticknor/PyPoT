@@ -2,14 +2,23 @@ import numpy as np
 import pandas as pd
 import pkgutil
 from io import StringIO
+import pickle
 
 
 def fetch_adquantiles_table():
+    """Fetches AD statistic quantiles table for use in threshold selection routine."""
     adq_table = pkgutil.get_data("pypot", "data/ADQuantiles.csv")
     adq_frame = pd.read_csv(StringIO(adq_table.decode('utf-8')), index_col=0)
     # need colnames to be floats
     adq_frame.columns = adq_frame.columns.astype(float)
     return adq_frame
+
+
+def fetch_example_dataset():
+    """Fetches example dataset for use in examples."""
+    sc_swells = pkgutil.get_data("pypot", "data/sc_swh_dataset.p")
+    swell_dataset = pickle.loads(sc_swells)
+    return swell_dataset
 
 
 def years_span_series(extremes_series):
