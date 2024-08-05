@@ -229,10 +229,11 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
 
     # constraint on xi
     # xi > -sigma / max(x)
+    # --> xi max(x_i) + sigma > 0
     max_x = max(x)
 
-    A = [1, 1 / max_x]
-    lb = 1e-12  # Lower bound of the constraint
+    A = [max_x, 1]
+    lb = 1e-12  # Lower bound of the constraint 0
     ub = float('inf')
 
     lin_constraint = LinearConstraint(A, lb, ub)
