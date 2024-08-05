@@ -81,21 +81,17 @@ def morans_statistic(x, xi, sigma):
     return T
 
 
-def param_cov_matrix(theta_hat, n):
-    """Computes the asymptotically approximated covariance matrix
-    for efficient estimators (e.g. MLE or MPS) of GPD xi and sigma
-    params.
+def param_cov_matrix(xi_hat, sigma_hat, n):
+    """Compute the covariance matrix for GDP parameter estimates.
 
-    Args:
-        theta_hat (iterable): point estimates
+    args:
+        xi_hat (float): xi estimator value
+        sigma_hat (float): sigma estimator value
         n (int): sample size
 
-    Returns:
-        np.ndarray: covariance matrix
+    returns:
+        (2d np.array): covariance matrix
     """
-    # unpack MLE point estimates
-    xi_hat = theta_hat[0]
-    sigma_hat = theta_hat[1]
     # unnormalized estimated asymptotic variances
     var_xi_hat = (1 - xi_hat**2)
     var_sigma_hat = 2 * sigma_hat **2 * (1 + xi_hat)
@@ -108,6 +104,7 @@ def param_cov_matrix(theta_hat, n):
     ])
     # normalize
     return n**(-1) * cov_matrix
+
 
 
 def gpd_neg_loglik_jacob(theta, x):
