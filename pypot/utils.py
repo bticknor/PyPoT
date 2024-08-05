@@ -1,5 +1,15 @@
 import numpy as np
 import pandas as pd
+import pkgutil
+from io import StringIO
+
+
+def fetch_adquantiles_table():
+    adq_table = pkgutil.get_data("pypot", "data/ADQuantiles.csv")
+    adq_frame = pd.read_csv(StringIO(adq_table.decode('utf-8')), index_col=0)
+    # need colnames to be floats
+    adq_frame.columns = adq_frame.columns.astype(float)
+    return adq_frame
 
 
 def years_span_series(extremes_series):
