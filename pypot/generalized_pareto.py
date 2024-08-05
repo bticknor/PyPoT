@@ -22,7 +22,9 @@ def gp_neg_loglik(x, xi, sigma):
     assert min(x) > 0
     if xi < 0:
         upper_bound = -1 * sigma / xi
-        assert max(x) < upper_bound, "observations outside of valid support"
+        assert max(x) < upper_bound, "observation {0} outside of support constraint {1}".format(
+            max(x), upper_bound
+        )
 
     n = len(x)
     s = sum(np.log(1 + xi * x / sigma))
