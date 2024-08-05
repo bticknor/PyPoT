@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-from pypot.generalized_pareto import param_cov_matrix
+from pypot.generalized_pareto import gp_param_cov_matrix
 from pypot.utils import years_span_series
 
 
-def compute_r_hat(L, lambda_hat, xi_hat, sigma_hat):
+def r_hat(L, lambda_hat, xi_hat, sigma_hat):
     """Given parameter point estimates, compute point estimate of the
     L year return level.
 
@@ -22,7 +22,7 @@ def compute_r_hat(L, lambda_hat, xi_hat, sigma_hat):
     return first * second
 
 
-def compute_lambda_hat(extremes_series):
+def lambda_hat(extremes_series):
     """Computes lambda hat as number of exceedences
     divided by number of years, using the time
     series.
@@ -46,7 +46,7 @@ def compute_lambda_hat(extremes_series):
     return n / years_span
 
 
-def normalized_cov_matrix(lambda_hat, xi_hat, sigma_hat, n, t):
+def pot_cov_matrix(lambda_hat, xi_hat, sigma_hat, n, t):
     """Computes the normalized covariance matrix
     for lambda, xi, sigma with assumed independence between
     lambda and the other two parameters.
@@ -62,7 +62,7 @@ def normalized_cov_matrix(lambda_hat, xi_hat, sigma_hat, n, t):
     # lower 2x2 block of covariance matrix
     # use just xi hat and sigma hat
     # TODO clean this up
-    lower_block = param_cov_matrix(xi_hat, sigma_hat, n)
+    lower_block = gp_param_cov_matrix(xi_hat, sigma_hat, n)
     full_cov_matrix = np.zeros((3, 3))
     full_cov_matrix[1:, 1:] = lower_block
     # normalize lambda hat by dividing by sample size T
@@ -111,7 +111,7 @@ def var_hat_r_l(lambda_hat, xi_hat, sigma_hat, n, t, L):
     returns:
         (float): approximate variance
     """
-    Sigma = normalized_cov_matrix(lambda_hat, xi_hat, sigma_hat, n, t)
+    Sigma = pot_cov_matrix(lambda_hat, xi_hat, sigma_hat, n, t)
     grad_R_L = grad_hat_r_l(lambda_hat, xi_hat, sigma_hat, L)
     approx_var = np.dot(np.dot(grad_R_L.transpose(), Sigma), grad_R_L)
 

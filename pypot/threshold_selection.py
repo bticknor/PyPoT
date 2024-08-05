@@ -1,5 +1,5 @@
 import numpy as np
-from pypot.generalized_pareto import cdf
+from pypot.generalized_pareto import gp_cdf
 
 
 def anderson_darling_statistic(x, xi, sigma):
@@ -17,7 +17,7 @@ def anderson_darling_statistic(x, xi, sigma):
     # sort the sample from low to high
     x = np.sort(x)
     # compute cdf values at sample points
-    cdf_vals_samp = cdf(x, xi, sigma)
+    cdf_vals_samp = gp_cdf(x, xi, sigma)
     # reverse the cdf vals
     # i.e. (z(1), z(2), ... z(n)) -> (z(n), z(n-1), ... z(1))
     cdf_vals_desc = cdf_vals_samp[::-1]

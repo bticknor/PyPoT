@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 from functools import partial
 
 
-def negative_log_likelihood(x, xi, sigma):
+def gp_negative_log_likelihood(x, xi, sigma):
     """Negative log likelihood of Generalized Pareto distribution
     in the "xi, sigma" parameterization.
 
@@ -30,7 +30,7 @@ def negative_log_likelihood(x, xi, sigma):
     return -1 * ll
 
 
-def cdf(x, xi, sigma):
+def gp_cdf(x, xi, sigma):
     """CDF of the GPD as parameterized by the paper linked above.
 
     x is a numpy array
@@ -46,7 +46,7 @@ def cdf(x, xi, sigma):
     return 1 - first
 
 
-def morans_statistic(x, xi, sigma):
+def gp_morans_statistic(x, xi, sigma):
     """Moran's "statistic" for GPD.  The maximum product of spacings
     estimators for GPD parameters minimize this function.
 
@@ -61,7 +61,7 @@ def morans_statistic(x, xi, sigma):
     # sort the sample from low to high
     x = np.sort(x)
     # compute cdf values at sample points
-    cdf_vals_samp = gpd_cdf(x, xi, sigma)
+    cdf_vals_samp = gp_cdf(x, xi, sigma)
     # add 0 to beginning and 1 ot end
     prb = np.hstack((0.0, cdf_vals_samp, 1))
     # compute differences between adjacent elements
@@ -81,7 +81,7 @@ def morans_statistic(x, xi, sigma):
     return T
 
 
-def param_cov_matrix(xi_hat, sigma_hat, n):
+def gp_param_cov_matrix(xi_hat, sigma_hat, n):
     """Compute the covariance matrix for GDP parameter estimates.
 
     args:
@@ -107,7 +107,7 @@ def param_cov_matrix(xi_hat, sigma_hat, n):
 
 
 
-def gpd_neg_loglik_jacob(theta, x):
+def gp_neg_loglik_jacob(theta, x):
     """Jacobian of the GPD negative log likelihood, used
     in the sequential quadratic programming optimization routine.
 
@@ -129,7 +129,7 @@ def gpd_neg_loglik_jacob(theta, x):
     return jacob
 
 
-def gpd_neg_loglik_hess(theta, x):
+def gp_neg_loglik_hess(theta, x):
     """Hessian of the GPD negative log likelihood, for use in
     optimization procedures that require it.
 
