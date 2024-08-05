@@ -71,7 +71,9 @@ def gp_density(x, xi, sigma):
     """
     # TODO bounds
     first = 1 + xi * x / sigma
-    second = first ** (-1 - 1/xi)
+    # numpy workaround
+    # https://stackoverflow.com/questions/45384602/numpy-runtimewarning-invalid-value-encountered-in-power
+    second = np.sign(first) * (np.abs(first)) ** (-1 - 1/xi)
     third = 1 / sigma * second
     return third
 
@@ -219,6 +221,8 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     # bounds and constraint
     # =========================================
     # sigma > 0
+    # xi in a range that produces finite support
+    # TODO specify this bound on xi as an option
     bounds = [(-1 / 2, 1 / 2), (0.01, None)]
 
     # constraint on xi
@@ -226,7 +230,7 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     max_x = max(x)
 
     A = [1, 1 / max_x]
-    lb = 1e-4  # Lower bound of the constraint
+    lb = 1e-12  # Lower bound of the constraint
     ub = float('inf')
 
     lin_constraint = LinearConstraint(A, lb, ub)
