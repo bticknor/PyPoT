@@ -51,14 +51,14 @@ def gp_cdf(x, xi, sigma):
     return 1 - first
 
 
-def gpd_inv_cdf(u, xi, sigma):
+def gp_inv_cdf(u, xi, sigma):
     """Inverse CDF of the GPD as paramaterized by the paper above."""
     first = (1 - u)**(-1 * xi) - 1
     second = sigma / xi * first
     return second
 
 
-def gpd_density(x, xi, sigma):
+def gp_density(x, xi, sigma):
     """Density function for GPD.
 
     args:
