@@ -22,8 +22,8 @@ def gp_neg_loglik(x, xi, sigma):
     assert min(x) > 0
     if xi < 0:
         upper_bound = -1 * sigma / xi
-        assert max(x) < upper_bound, "observation {0} outside of support constraint {1}".format(
-            max(x), upper_bound
+        assert max(x) < upper_bound, "observation {0} outside of support constraint {1}, xi={2}, sigma={3}".format(
+            max(x), upper_bound, xi, sigma
         )
 
     n = len(x)
@@ -232,8 +232,11 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     # --> xi max(x_i) + sigma > 0
     max_x = max(x)
 
-    A = [max_x, 1]
-    lb = 1e-4  # Lower bound of the constraint 0
+    A = [1, 1 / max_x]
+    # Lower bound of the constraint is 0
+    # we set to a small value to avoid numerical issues with support checks
+    # TODO do this more elegantly
+    lb = 1e-2
     ub = float('inf')
 
     lin_constraint = LinearConstraint(A, lb, ub)
