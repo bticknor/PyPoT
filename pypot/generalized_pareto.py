@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 from functools import partial
 
 
-def gp_negative_log_likelihood(x, xi, sigma):
+def gp_negative_log_like(x, xi, sigma):
     """Negative log likelihood of Generalized Pareto distribution
     in the "xi, sigma" parameterization.
 
