@@ -233,7 +233,7 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     max_x = max(x)
 
     A = [max_x, 1]
-    lb = 0  # Lower bound of the constraint 0
+    lb = 1e-4  # Lower bound of the constraint 0
     ub = float('inf')
 
     lin_constraint = LinearConstraint(A, lb, ub)
