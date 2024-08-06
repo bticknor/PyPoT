@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.stats import linregress
+from pypot.generalized_pareto import anderson_darling_statistic, fit_GPD, gp_neg_loglik, gp_neg_loglik_jacob
+from pypot.utils import fetch_adquantiles_table, get_extremes_peaks_over_threshold
 
 
 def log_interpolate_p(stat, xi, quantiles_table):
@@ -103,7 +105,7 @@ def AD_approx_p_val(stat, xi, quantiles_table):
 
 
 
-def forward_stop_u_selection(p_vals, alpha):
+def forward_stop(p_vals, alpha):
     """ForwardStop implementation, equation (2) from the paper.
 
     args:
@@ -121,3 +123,72 @@ def forward_stop_u_selection(p_vals, alpha):
 
     max_k = max(np.where(scaled_qsums < alpha)[0])
     return max_k
+
+
+def forward_stop_u_selection(series, thresh_up, thresh_down, l, r, alpha=0.05):
+    """Automatically select threshold for PoT analysis
+    using forwardStop algorithm.
+
+    args:
+        series (np.array): raw time series
+        thresh_up (float): largest threshold to try
+        thresh_down (float): smallest threshold to try
+        l (int): number of thresholds in the grid between
+            thresh_down and thresh_up
+        r (str): time delta string to define independence
+        alpha (float): false discovery rate control (i.e. 0.05 is 5%)
+
+    returns:
+        (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
+    """
+    # threshold grid
+    thresholds = np.linspace(thresh_up, thresh_down, l)
+
+    p_vals = np.zeros(len(thresholds))
+    xi_hats = np.zeros(len(thresholds))
+    sigma_hats = np.zeros(len(thresholds))
+
+    # quantiles table for p value approximation
+    adq_frame = fetch_adquantiles_table()
+
+    # initial guess for optimizer
+    THETA_0 = (1/5, 1)
+
+    # loop through thresholds to test
+    for i, cand_threshold in enumerate(thresholds):
+        # get extremes corresponding to threshold
+        extremes = get_extremes_peaks_over_threshold(
+            series,
+            cand_threshold,
+            r
+        )
+        # subtract away threshold for peaks
+        x_cand = extremes - cand_threshold
+
+        # fit GPD to peaks
+        mle_cand = fit_GPD(
+            x_cand,
+            THETA_0,
+            gp_neg_loglik,
+            gp_neg_loglik_jacob
+        )
+        xi_hat_cand = mle_cand[0]
+        xi_hats[i] = xi_hat_cand
+
+        sigma_hat_cand = mle_cand[1]
+        sigma_hats[i] = sigma_hat_cand
+
+        # compute AD statistic
+        ad_stat_cand = anderson_darling_statistic(x_cand, xi_hat_cand, sigma_hat_cand)
+
+        # p-value of AD test
+        p_cand = AD_approx_p_val(ad_stat_cand, round(xi_hat_cand, 2), adq_frame)
+
+        p_vals[i] = p_cand
+
+    # forward stop algorithm
+    threshold_selection_index = forward_stop_u_selection(p_vals, alpha)
+    chosen_threshold = thresholds[threshold_selection_index]
+    chosen_xi_hat = xi_hats[threshold_selection_index]
+    chosen_sigma_hat = sigma_hats[threshold_selection_index]
+    return chosen_threshold, np.array([chosen_xi_hat, chosen_sigma_hat])
