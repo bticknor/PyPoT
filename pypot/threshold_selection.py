@@ -1,32 +1,5 @@
 import numpy as np
 from scipy.stats import linregress
-from pypot.generalized_pareto import gp_cdf
-
-
-def anderson_darling_statistic(x, xi, sigma):
-    """Anderson Darling statistic for GPD.
-
-    args:
-        x (np.array): data
-        xi (float): xi parameter
-        sigma (float): sigma parameter
-
-    returns:
-        (float) value of the statistic
-    """
-    n = len(x)
-    # sort the sample from low to high
-    x = np.sort(x)
-    # compute cdf values at sample points
-    cdf_vals_samp = gp_cdf(x, xi, sigma)
-    # reverse the cdf vals
-    # i.e. (z(1), z(2), ... z(n)) -> (z(n), z(n-1), ... z(1))
-    cdf_vals_desc = cdf_vals_samp[::-1]
-    # array of 2i - 1 for i=1, ..., n
-    coeff = 2 * np.arange(1, n + 1) - 1
-    # sum term
-    s = np.sum(coeff * (np.log(cdf_vals_samp) + np.log(1 - cdf_vals_desc)))
-    return -1 * n - s/n
 
 
 def log_interpolate_p(stat, xi, quantiles_table):
@@ -103,7 +76,7 @@ def regress_impute_p(stat, xi, quantiles_table):
     return p
 
 
-def AD_p_val(stat, xi, quantiles_table):
+def AD_approx_p_val(stat, xi, quantiles_table):
     """Approximate the p value associated with an AD statistic,
     given xi estimator.  The asymptotic distribution of the AD
     statistic depends on xi, hence the dependency.  If the stat
