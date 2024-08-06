@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import linregress
 from pypot.generalized_pareto import gp_cdf
 
 
@@ -71,6 +72,60 @@ def log_interpolate_p(stat, xi, quantiles_table):
     val = (dif * (-1 * np.log(bound) + np.log(upper_p_val_bound))) + np.log(bound)
     p = np.exp(val)
     return p
+
+
+def regress_impute_p(stat, xi, quantiles_table):
+    """Predict the small p-value associated with a large AD test statistic
+    using the regression method of Bader et all.  Code is translated from
+    this R code:
+
+    https://github.com/brianbader/eva_package/blob/master/R/gpdAd.R
+
+    args:
+        stat (float): value of the AD statistic
+        xi (float): value of the xi parameter estimate used to calculate the AD statistic,
+            rounded to 2 decimal places
+        quantiles table (pd.DataFrame): table of quantiles
+
+    returns:
+        (float) p-value
+    """
+
+    stats_xi = quantiles_table.loc[xi]
+    # 50 p values and critical vals in the tail
+    tail_p_vals = stats_xi.iloc[-50:]
+    x = tail_p_vals.index
+    y = -1 * np.log(tail_p_vals.values)
+    # regression for interpolation
+    slope, intercept, _, _, _ = linregress(x, y=y)
+    predicted = slope * stat + intercept
+    p = np.exp(-1 * predicted)
+    return p
+
+
+def AD_p_val(stat, xi, quantiles_table):
+    """Approximate the p value associated with an AD statistic,
+    given xi estimator.  The asymptotic distribution of the AD
+    statistic depends on xi, hence the dependency.  If the stat
+    falls within the range of the precomputed table, interpolate it
+    using the table.  If not, impute it using the regression method
+    of Bader et. all.
+
+    args:
+        stat (float): value of the AD statistic
+        xi (float): value of the xi parameter estimate used to calculate the AD statistic,
+            rounded to 2 decimal places
+        quantiles table (pd.DataFrame): table of quantiles
+
+    returns:
+        (float) p-value
+    """
+    if stat > quantiles_table.loc[xi].iloc[-1]:
+        p = regress_impute_p(stat, xi, quantiles_table)
+    else:
+        p = log_interpolate_p(stat, xi, quantiles_table)
+    return p
+
 
 
 def forward_stop_u_selection(p_vals, alpha):
