@@ -257,8 +257,10 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
         method="SLSQP",
         jac=jacob,
     )
+    # ensure optimization routine converged
+    if result.message != "Optimization terminated successfully":
+        raise RuntimeError("optimization failed in fit_GPD")
 
-    print(result.message)
     return result.x
 
 
