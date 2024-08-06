@@ -125,7 +125,7 @@ def forward_stop(p_vals, alpha):
     return max_k
 
 
-def forward_stop_u_selection(series, thresh_up, thresh_down, l, r, alpha=0.05):
+def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
     """Automatically select threshold for PoT analysis
     using forwardStop algorithm.
 
@@ -141,8 +141,10 @@ def forward_stop_u_selection(series, thresh_up, thresh_down, l, r, alpha=0.05):
     returns:
         (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
     """
+    assert thresh_down < thresh_up, "lower threshold bound must be below upper threshold bound"
+
     # threshold grid
-    thresholds = np.linspace(thresh_up, thresh_down, l)
+    thresholds = np.linspace(thresh_down, thresh_up, l)
 
     p_vals = np.zeros(len(thresholds))
     xi_hats = np.zeros(len(thresholds))
@@ -187,7 +189,7 @@ def forward_stop_u_selection(series, thresh_up, thresh_down, l, r, alpha=0.05):
         p_vals[i] = p_cand
 
     # forward stop algorithm
-    threshold_selection_index = forward_stop_u_selection(p_vals, alpha)
+    threshold_selection_index = forward_stop(p_vals, alpha)
     chosen_threshold = thresholds[threshold_selection_index]
     chosen_xi_hat = xi_hats[threshold_selection_index]
     chosen_sigma_hat = sigma_hats[threshold_selection_index]
