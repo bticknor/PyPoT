@@ -24,7 +24,7 @@ To install PyPoT via pip, clone the repository to your machine, navigate to the 
 
 ## Documentation
 
-Mathematical "documentation" that includes definitions and expressions for asymptotic results can be found [here](stats.md).  A Jupyter notebook with examples code for performing PoT analysis tasks can be found [here](examples/PyPoT_examples.ipynb).  Full documentation of all available routines is still under construction.
+Mathematical "documentation" that includes definitions and expressions for asymptotic results can be found [here](stats.md).  A Jupyter notebook with examples code for performing PoT analysis tasks can be found [here](pypot/examples/PyPoT_examples.ipynb).  Full documentation of all available routines is still under construction.
 
 ## TODOs
 
