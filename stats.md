@@ -125,7 +125,7 @@ P-values for this test are computed using the critical value table [here](pypot/
     \hat{k}_F = max \Biggl\{ k \in \{1, ..., l\}: \; -\frac{1}{k} \sum_{i=1}^k log(1 - p_i) \leq \alpha \Biggr\}
 ```
 
-For false discovery rate control $\alpha$.
+For false discovery rate control $\alpha$.  See the paper for more details.
 
 
 TODO CITE:
