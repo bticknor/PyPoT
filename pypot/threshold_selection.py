@@ -116,5 +116,8 @@ def forward_stop_u_selection(p_vals, alpha):
     k = np.arange(len(p_vals)) + 1
     scaled_qsums = -1 / k * np.cumsum(np.log(1 - p_vals))
     # first value where
+    if alpha < min(scaled_qsums):
+        raise RuntimeError("cannot control FDR at level {0}, try reducing alpha".format(alpha))
+
     max_k = max(np.where(scaled_qsums < alpha)[0])
     return max_k
