@@ -93,6 +93,8 @@ def AD_approx_p_val(stat, xi, quantiles_table):
     returns:
         (float) p-value
     """
+    # for keying into table
+    xi = round(xi, 2)
     if stat > quantiles_table.loc[xi].iloc[-1]:
         p = regress_impute_p(stat, xi, quantiles_table)
     else:
