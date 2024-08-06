@@ -107,7 +107,25 @@ https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
 
 ## Threshold Selection
 
-TODO!
+PyPoT includes an implementation of the goodness-of-fit based threshold selection procedure given by Bader et. all (TODO CITE).  PyPoT uses the ForwardStop algorithm with the Anderson-Darling hypothesis test, where the AD statistic is defined as:
+
+```math
+    A_n^2 = -n - \frac{1}{n} \sum_{i=1}^n (2i - 1) [log(z_{(i)}) + log(1 - z_{(n + 1 - i)}) ]
+```
+
+Where:
+
+```math
+    z_{(i)} = F_{\xi, \sigma}(x_{(i)})
+```
+
+P-values for this test are computed using the critical value table [here](pypot/data/ADQuantiles.csv).  This critical value table and code for interpolating between values is translated directly from [here](https://github.com/brianbader/eva_package/tree/master).  The ForwardStop algorithm chooses from $l$ ordered hypothesis tests using the logice:
+
+```math
+    \hat{k}_F = max \{ k \in \{1, ..., l\}: \; -\frac{1}{k} \sum_{i=1}^k log(1 - p_i) \leq \alpha
+```
+
+For false discovery rate control $\alpha$.
 
 
 TODO CITE:
