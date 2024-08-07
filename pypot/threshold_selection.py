@@ -104,30 +104,22 @@ def AD_approx_p_val(stat, xi, quantiles_table):
     return p
 
 
-
-def forward_stop(p_vals, alpha):
-    """ForwardStop implementation, equation (2) from the paper.
+def forward_stop_adjusted_p(p_vals):
+    """ForwardStop adjusted p-values, equation (2) from the paper.
 
     args:
         p_vals (np.array[float]): p_values of ordered hypothesis tests
-        alpha (float): false positive rate control
 
     returns:
         (int): location in p_vals array of chosen u threshold
     """
     k = np.arange(len(p_vals)) + 1
     scaled_qsums = -1 / k * np.cumsum(np.log(1 - p_vals))
-    # first value where
-    if alpha < min(scaled_qsums):
-        raise RuntimeError("cannot control FDR at level {0}, try reducing alpha".format(alpha))
-
-    max_k = max(np.where(scaled_qsums < alpha)[0])
-    return max_k
+    return scaled_qsums
 
 
-def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
-    """Automatically select threshold for PoT analysis
-    using forwardStop algorithm.
+def run_AD_tests(series, thresh_down, thresh_up, l, r):
+    """Run an ordered set of Anderson-Darling hypothesis tests.
 
     args:
         series (np.array): raw time series
@@ -139,7 +131,7 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
         alpha (float): false discovery rate control (i.e. 0.05 is 5%)
 
     returns:
-        (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
+        (tuple[np.array]): threshold, p_value, xi_hat, and sigma_hat for each test
     """
     assert thresh_down < thresh_up, "lower threshold bound must be below upper threshold bound"
 
@@ -154,6 +146,7 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
     adq_frame = fetch_adquantiles_table()
 
     # initial guess for optimizer
+    # TODO parameterize
     THETA_0 = (1/5, 1)
 
     # loop through thresholds to test
@@ -188,8 +181,36 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
 
         p_vals[i] = p_cand
 
+    # return p values and MLEs
+    return thresholds, p_vals, xi_hats, sigma_hats
+
+
+def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
+    """Automatically select threshold for PoT analysis
+    using forwardStop algorithm.
+
+    args:
+        series (np.array): raw time series
+        thresh_up (float): largest threshold to try
+        thresh_down (float): smallest threshold to try
+        l (int): number of thresholds in the grid between
+            thresh_down and thresh_up
+        r (str): time delta string to define independence
+        alpha (float): false discovery rate control (i.e. 0.05 is 5%)
+
+    returns:
+        (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
+    """
+    # run sequence of AD tests
+    thresholds, p_vals, xi_hats, sigma_hats = run_AD_tests(series, thresh_down, thresh_up, l, r)
     # forward stop algorithm
-    threshold_selection_index = forward_stop(p_vals, alpha)
+    adjusted_p_vals = forward_stop_adjusted_p(p_vals)
+
+    # first value where
+    if alpha < min(adjusted_p_vals):
+        raise RuntimeError("cannot control FDR at level {0}, try reducing alpha".format(alpha))
+
+    threshold_selection_index = max(np.where(adjusted_p_vals < alpha)[0])
     chosen_threshold = thresholds[threshold_selection_index]
     chosen_xi_hat = xi_hats[threshold_selection_index]
     chosen_sigma_hat = sigma_hats[threshold_selection_index]
