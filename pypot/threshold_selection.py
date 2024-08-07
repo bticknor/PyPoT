@@ -125,9 +125,8 @@ def forward_stop(p_vals, alpha):
     return max_k
 
 
-def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
-    """Automatically select threshold for PoT analysis
-    using forwardStop algorithm.
+def run_AD_tests(series, thresh_down, thresh_up, l, r):
+    """Run an ordered set of Anderson-Darling hypothesis tests.
 
     args:
         series (np.array): raw time series
@@ -139,7 +138,7 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
         alpha (float): false discovery rate control (i.e. 0.05 is 5%)
 
     returns:
-        (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
+        (tuple[np.array]): threshold, p_value, xi_hat, and sigma_hat for each test
     """
     assert thresh_down < thresh_up, "lower threshold bound must be below upper threshold bound"
 
@@ -154,6 +153,7 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
     adq_frame = fetch_adquantiles_table()
 
     # initial guess for optimizer
+    # TODO parameterize
     THETA_0 = (1/5, 1)
 
     # loop through thresholds to test
@@ -188,6 +188,28 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
 
         p_vals[i] = p_cand
 
+    # return p values and MLEs
+    return thresholds, p_vals, xi_hats, sigma_hats
+
+
+def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
+    """Automatically select threshold for PoT analysis
+    using forwardStop algorithm.
+
+    args:
+        series (np.array): raw time series
+        thresh_up (float): largest threshold to try
+        thresh_down (float): smallest threshold to try
+        l (int): number of thresholds in the grid between
+            thresh_down and thresh_up
+        r (str): time delta string to define independence
+        alpha (float): false discovery rate control (i.e. 0.05 is 5%)
+
+    returns:
+        (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
+    """
+    # run sequence of AD tests
+    thresholds, p_vals, xi_hats, sigma_hats = run_AD_tests(series, thresh_down, thresh_up, l, r)
     # forward stop algorithm
     threshold_selection_index = forward_stop(p_vals, alpha)
     chosen_threshold = thresholds[threshold_selection_index]
