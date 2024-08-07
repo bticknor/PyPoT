@@ -104,25 +104,18 @@ def AD_approx_p_val(stat, xi, quantiles_table):
     return p
 
 
-
-def forward_stop(p_vals, alpha):
-    """ForwardStop implementation, equation (2) from the paper.
+def forward_stop_adjusted_p(p_vals):
+    """ForwardStop adjusted p-values, equation (2) from the paper.
 
     args:
         p_vals (np.array[float]): p_values of ordered hypothesis tests
-        alpha (float): false positive rate control
 
     returns:
         (int): location in p_vals array of chosen u threshold
     """
     k = np.arange(len(p_vals)) + 1
     scaled_qsums = -1 / k * np.cumsum(np.log(1 - p_vals))
-    # first value where
-    if alpha < min(scaled_qsums):
-        raise RuntimeError("cannot control FDR at level {0}, try reducing alpha".format(alpha))
-
-    max_k = max(np.where(scaled_qsums < alpha)[0])
-    return max_k
+    return scaled_qsums
 
 
 def run_AD_tests(series, thresh_down, thresh_up, l, r):
@@ -211,7 +204,13 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
     # run sequence of AD tests
     thresholds, p_vals, xi_hats, sigma_hats = run_AD_tests(series, thresh_down, thresh_up, l, r)
     # forward stop algorithm
-    threshold_selection_index = forward_stop(p_vals, alpha)
+    adjusted_p_vals = forward_stop_adjusted_p(p_vals)
+
+    # first value where
+    if alpha < min(adjusted_p_vals):
+        raise RuntimeError("cannot control FDR at level {0}, try reducing alpha".format(alpha))
+
+    threshold_selection_index = max(np.where(adjusted_p_vals < alpha)[0])
     chosen_threshold = thresholds[threshold_selection_index]
     chosen_xi_hat = xi_hats[threshold_selection_index]
     chosen_sigma_hat = sigma_hats[threshold_selection_index]
