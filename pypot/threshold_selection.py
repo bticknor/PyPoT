@@ -207,10 +207,11 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
     adjusted_p_vals = forward_stop_adjusted_p(p_vals)
 
     # if all adjusted p-vals greater than alpha, use the lowest threshold
+    # TODO if all adjusted p vals less alpha, throw error
     adjusted_less_alpha = np.where(adjusted_p_vals < alpha)[0]
     if len(adjusted_less_alpha) == 0:
-        # TODO mention this
-        threshold_selection_index = thresh_down
+        # all data above threshold looks pareto
+        threshold_selection_index = 0
     else:
         threshold_selection_index = max(np.where(adjusted_p_vals < alpha)[0])
     chosen_threshold = thresholds[threshold_selection_index]
