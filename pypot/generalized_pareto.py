@@ -225,7 +225,7 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     # sigma > 0
     # xi in a range that produces finite support
     # TODO specify this bound on xi as an option
-    bounds = [(-1 / 2, 1 / 2), (0.01, None)]
+    bounds = [(-1 / 2, 1 / 2), (0.05, None)]
 
     # constraint on xi
     # xi > -sigma / max(x)
