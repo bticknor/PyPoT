@@ -14,20 +14,18 @@ def gp_neg_loglik(x, xi, sigma):
         sigma (numeric): sigma parameter
 
     Returns:
-        numeric: negative log likelihood value
+        numeric: negative log likelihood value, or nan if invalid support
     """
-    # SANITY CHECKS
-    # make sure that each data point is in the support set,
-    # which depends on parameter values
-    assert min(x) > 0
-    if xi < 0:
-        upper_bound = -1 * sigma / xi
-        assert max(x) < upper_bound, "observation {0} outside of support constraint {1}, xi={2}, sigma={3}".format(
-            max(x), upper_bound, xi, sigma
-        )
-
     n = len(x)
-    s = sum(np.log(1 + xi * x / sigma))
+    # https://stackoverflow.com/questions/49461299/how-does-scipy-minimize-handle-nans
+    # During some optimization iterations (see GPD_fit below) the optimizer will not enforce the linear
+    # support constraint, leading to negative numbers in the np.log() here.  This does not mess with the
+    # minimizer, which views nans as very large and searches away from them, effectively enforcing
+    # the constraint.  We do not want to throw warnings every time, so we ignore the warnings and let
+    # the minimizer avoid the support constraint.  If this function is called with x values that violate
+    # the support constraint, it will return np.nan.
+    with np.errstate(divide='ignore', invalid='ignore'):
+        s = sum(np.log(1 + xi * x / sigma))
     ll = -1 * n * np.log(sigma) + (-1 - 1 / xi) * s
     return -1 * ll
 
@@ -71,7 +69,7 @@ def gp_density(x, xi, sigma):
     returns:
         (np.array) values of the density function
     """
-    # TODO bounds
+    # TODO bounds check option
     first = 1 + xi * x / sigma
     # numpy workaround
     # https://stackoverflow.com/questions/45384602/numpy-runtimewarning-invalid-value-encountered-in-power
@@ -225,7 +223,7 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     # sigma > 0
     # xi in a range that produces finite support
     # TODO specify this bound on xi as an option
-    bounds = [(-1 / 2, 1 / 2), (0.05, None)]
+    bounds = [(-1 / 2, 1 / 2), (0.01, None)]
 
     # constraint on xi
     # xi > -sigma / max(x)
@@ -233,10 +231,8 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     max_x = max(x)
 
     A = [1, 1 / max_x]
-    # Lower bound of the constraint is 0
-    # we set to a small value to avoid numerical issues with support checks
-    # TODO do this more elegantly
-    lb = 1e-2
+    # constraint bounds
+    lb = 0
     ub = float('inf')
 
     lin_constraint = LinearConstraint(A, lb, ub)
@@ -260,6 +256,17 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     # ensure optimization routine converged
     if result.message != "Optimization terminated successfully":
         raise RuntimeError("optimization failed in fit_GPD")
+
+    # sanity checks for support - make sure the optimizer respected the constraint
+    # check this after the fact as the optimizer will not enforce the constraint at every iteration
+    # https://stackoverflow.com/questions/47682698/scipy-optimization-with-slsqp-disregards-constraints
+    xi_hat = result.x[0]
+    sigma_hat = result.x[1]
+    if xi_hat < 0:
+        upper_bound = -1 * sigma_hat / xi_hat
+        assert max_x < upper_bound, "observation {0} outside of support constraint {1}, xi_hat={2}, sigma_hat={3}".format(
+            max_x, upper_bound, xi_hat, sigma_hat
+        )
 
     return result.x
 
