@@ -12,7 +12,7 @@ Where GPD is the Generalized Pareto Distribution with the location parameter fix
 
 - Maximum likelihood and maximum product of spacings point estimation of model parameters, and asymptotic uncertainty quantification
 - Return level estimation and asymptotic uncertainty quantification
-- Statistically principled automatic threshold selection
+- Statistically principled automatic threshold selection using the ForwardStop algorithm via Anderson-Darling hypothesis tests, as described by Bader et. all (2018)
 
 This is a statistical library with a very limited scope. Routines for visualizing extreme values can be found in (e.g.) [PyExtremes](https://github.com/georgebv/pyextremes).
 
