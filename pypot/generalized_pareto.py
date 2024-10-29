@@ -255,7 +255,7 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     )
     # ensure optimization routine converged
     if result.message != "Optimization terminated successfully":
-        raise RuntimeError("optimization failed in fit_GPD")
+        raise RuntimeError("optimization failed in fit_GPD: {0}".format(result.message))
 
     # sanity checks for support - make sure the optimizer respected the constraint
     # check this after the fact as the optimizer will not enforce the constraint at every iteration
