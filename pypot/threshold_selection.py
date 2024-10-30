@@ -113,6 +113,9 @@ def forward_stop_adjusted_p(p_vals):
     returns:
         (int): location in p_vals array of chosen u threshold
     """
+    # imputation procedure occaisonally yields p > 1
+    p_vals = np.minimum(p_vals, 1)
+
     k = np.arange(len(p_vals)) + 1
     scaled_qsums = -1 / k * np.cumsum(np.log(1 - p_vals))
     return scaled_qsums
