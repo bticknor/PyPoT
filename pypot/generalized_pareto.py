@@ -230,7 +230,9 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
     # --> xi max(x_i) + sigma > 0
     max_x = max(x)
 
-    A = [1, 1 / max_x]
+    # scaling factor to avoid numerical precision issues
+    scale_factor = 10
+    A = [scale_factor, scale_factor / max_x]
     # constraint bounds
     lb = 0
     ub = float('inf')
