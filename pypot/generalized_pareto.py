@@ -227,14 +227,14 @@ def fit_GPD(x, theta_0, f_minimize, jacobian=None):
 
     # constraint on xi
     # xi > -sigma / max(x)
-    # --> xi max(x_i) + sigma > 0
+    # --> xi + sigma / max(x) > 0
     max_x = max(x)
 
     # scaling factor to avoid numerical precision issues
     scale_factor = 1000
     A = [scale_factor, scale_factor / max_x]
-    # constraint bounds
-    lb = 0
+    # constraint bounds - "true" lower bound will be lb / scale_factor
+    lb = 0.01
     ub = float('inf')
 
     lin_constraint = LinearConstraint(A, lb, ub)
