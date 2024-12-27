@@ -213,11 +213,9 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
     if min(adjusted_p_vals) > alpha:
         threshold_selection_index = 0
     # if no adjusted p-vals greater than alpha
+    # maximum index is used
     elif max(adjusted_p_vals) < alpha:
-        raise RuntimeError("cannot control FDR at level {0}, maximum adjusted p-value is {1}".format(
-            alpha,
-            max(adjusted_p_vals)
-        ))
+        threshold_selection_index = len(adjusted_p_vals) - 1
     # else, find max_k
     else:
         threshold_selection_index = max(np.where(adjusted_p_vals < alpha)[0])
