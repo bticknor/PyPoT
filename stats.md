@@ -20,7 +20,7 @@ The maximum likelihood estimators minimize the GPD negative log likelihood:
 
 ```math
     \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -l(\xi, \sigma | x) \\
-    -l(\xi, \sigma | x) = -nlog(\sigma) - (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
+    -l(\xi, \sigma | x) = nlog(\sigma) + (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
 ```
 
 The gradient of the GPD negative log likelihood is determined by:
