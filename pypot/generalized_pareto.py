@@ -225,7 +225,7 @@ def fit_GPD_diff_evo(data, y_lab, x_lab):
 
     # fit model using differential evolution
     result = differential_evolution(
-        nll_gpd,
+        gp_nll,
         bounds,
         args = (y, X),
         strategy="best1bin",
