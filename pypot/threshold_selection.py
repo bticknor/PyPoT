@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import linregress
-from pypot.generalized_pareto import anderson_darling_statistic, fit_GPD, gp_neg_loglik, gp_neg_loglik_jacob
+from pypot.generalized_pareto import anderson_darling_statistic, fit_GPD_diff_evo
 from pypot.utils import fetch_adquantiles_table, get_extremes_peaks_over_threshold
 
 
@@ -65,7 +65,6 @@ def regress_impute_p(stat, xi, quantiles_table):
     returns:
         (float) p-value
     """
-
     stats_xi = quantiles_table.loc[xi]
     # 50 p values and critical vals in the tail
     tail_p_vals = stats_xi.iloc[-50:]
@@ -121,11 +120,13 @@ def forward_stop_adjusted_p(p_vals):
     return scaled_qsums
 
 
-def run_AD_tests(series, thresh_down, thresh_up, l, r):
-    """Run an ordered set of Anderson-Darling hypothesis tests.
+def run_AD_tests(data, y_lab, thresh_down, thresh_up, l, r):
+    """Run an ordered set of Anderson-Darling hypothesis tests for
+    univariate GPD data.
 
     args:
-        series (np.array): raw time series
+        data (pd.DataFrame): data
+        y_lab: (str) label of y column
         thresh_up (float): largest threshold to try
         thresh_down (float): smallest threshold to try
         l (int): number of thresholds in the grid between
@@ -148,15 +149,11 @@ def run_AD_tests(series, thresh_down, thresh_up, l, r):
     # quantiles table for p value approximation
     adq_frame = fetch_adquantiles_table()
 
-    # initial guess for optimizer
-    # TODO parameterize
-    THETA_0 = (1/5, 1)
-
     # loop through thresholds to test
     for i, cand_threshold in enumerate(thresholds):
         # get extremes corresponding to threshold
         extremes = get_extremes_peaks_over_threshold(
-            series,
+            data[y_lab],
             cand_threshold,
             r
         )
@@ -164,16 +161,17 @@ def run_AD_tests(series, thresh_down, thresh_up, l, r):
         x_cand = extremes - cand_threshold
 
         # fit GPD to peaks
-        mle_cand = fit_GPD(
-            x_cand,
-            THETA_0,
-            gp_neg_loglik,
-            gp_neg_loglik_jacob
+        mle_cand = fit_GPD_diff_evo(
+            data,
+            y_lab,
+            []    # no covariates
         )
+
         xi_hat_cand = mle_cand[0]
         xi_hats[i] = xi_hat_cand
 
-        sigma_hat_cand = mle_cand[1]
+        # sigma = exp(beta) for no covariates
+        sigma_hat_cand = np.exp(mle_cand[1])
         sigma_hats[i] = sigma_hat_cand
 
         # compute AD statistic
