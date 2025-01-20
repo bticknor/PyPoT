@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import LinearConstraint
 from scipy.optimize import minimize
-from functools import partial
+from sicpy.optimize import differential_evolution
 
 
 def gp_nll(params, y, X):
