@@ -186,12 +186,13 @@ def run_AD_tests(data, y_lab, thresh_down, thresh_up, l, r):
     return thresholds, p_vals, xi_hats, sigma_hats
 
 
-def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
+def forward_stop_u_selection(data, y_lab, thresh_down, thresh_up, l, r, alpha=0.05):
     """Automatically select threshold for PoT analysis
     using forwardStop algorithm.
 
     args:
-        series (np.array): raw time series
+        data (pd.DataFrame): data
+        y_lab: (str) label of y column        
         thresh_up (float): largest threshold to try
         thresh_down (float): smallest threshold to try
         l (int): number of thresholds in the grid between
@@ -203,7 +204,9 @@ def forward_stop_u_selection(series, thresh_down, thresh_up, l, r, alpha=0.05):
         (tuple[float, np.array[float, float]]): (threshold, [xi_hat, sigma_hat])
     """
     # run sequence of AD tests
-    thresholds, p_vals, xi_hats, sigma_hats = run_AD_tests(series, thresh_down, thresh_up, l, r)
+    thresholds, p_vals, xi_hats, sigma_hats = run_AD_tests(
+        data, y_lab, thresh_down, thresh_up, l, r
+    )
     # forward stop algorithm
     adjusted_p_vals = forward_stop_adjusted_p(p_vals)
 
