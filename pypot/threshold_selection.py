@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.stats import linregress
 from pypot.generalized_pareto import anderson_darling_statistic, fit_GPD_diff_evo
 from pypot.utils import fetch_adquantiles_table, get_extremes_peaks_over_threshold
@@ -158,11 +159,14 @@ def run_AD_tests(data, y_lab, thresh_down, thresh_up, l, r):
             r
         )
         # subtract away threshold for peaks
-        x_cand = extremes - cand_threshold
+        y_cand = extremes - cand_threshold
+
+        # generate dataset of extremes
+        fit_data = pd.DataFrame(y_cand, columns=[y_lab])
 
         # fit GPD to peaks
         mle_cand = fit_GPD_diff_evo(
-            data,
+            fit_data,
             y_lab,
             []    # no covariates
         )
@@ -171,11 +175,12 @@ def run_AD_tests(data, y_lab, thresh_down, thresh_up, l, r):
         xi_hats[i] = xi_hat_cand
 
         # sigma = exp(beta) for no covariates
+        # this follows from MLE invariance
         sigma_hat_cand = np.exp(mle_cand[1])
         sigma_hats[i] = sigma_hat_cand
 
         # compute AD statistic
-        ad_stat_cand = anderson_darling_statistic(x_cand, xi_hat_cand, sigma_hat_cand)
+        ad_stat_cand = anderson_darling_statistic(y_cand, xi_hat_cand, sigma_hat_cand)
 
         # p-value of AD test
         p_cand = AD_approx_p_val(ad_stat_cand, round(xi_hat_cand, 2), adq_frame)

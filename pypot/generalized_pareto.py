@@ -1,13 +1,13 @@
 import numpy as np
-from scipy.optimize import LinearConstraint
 from scipy.optimize import minimize
 from scipy.optimize import differential_evolution
+from functools import partial
 
 
 def gp_nll(params, y, X):
     """
     Negative log-likelihood for the GPD model, optionally with covariates
-    
+
     params: array-like, parameters to optimize [xi, beta_0, beta_1, ..., beta_p]
     y: array-like, observed data (response variable)
     X: array-like, design matrix for covariates (n_samples, p_features)
@@ -19,15 +19,15 @@ def gp_nll(params, y, X):
 
     # TODO parameterize link function
     sigma = np.exp(X @ beta)  # Scale parameter (positive by construction)
-    
+
     # Check the validity of the support
     if np.any(1 + xi * y / sigma <= 0):  # Ensure the support is satisfied
         return np.inf
-    
+
     # Compute the negative log-likelihood
     term1 = np.sum(np.log(sigma))  # Scale term
     term2 = np.sum((1 + 1 / xi) * np.log(1 + xi * y / sigma))  # Shape-dependent term
-    
+
     return term1 + term2
 
 
@@ -140,25 +140,28 @@ def gp_param_cov_matrix(xi_hat, sigma_hat, n):
     return n**(-1) * cov_matrix
 
 
-def gp_neg_loglik_jacob(theta, x):
+def gp_neg_loglik_jacob(theta, y):
     """Jacobian of the univariate GPD negative log likelihood, can be
     used in gradient based optimization methods.
 
     args:
-        theta (array[float]): (xi, sigma) params
+        theta (array[float]): (xi, beta) params
         x (array[float]): data
     returns:
         (array[float]) value of the jacobian
     """
     xi = theta[0]
-    sigma = theta[1]
-    n = len(x)
+    beta = theta[1]
+    sigma = np.exp(beta)
+    n = len(y)
 
     # partial derivatives
-    d_dxi = (1 + 1 / xi) * np.sum(x / (sigma + xi * x)) - np.sum(np.log(1 + xi * x / sigma)) * xi ** (-1 * 2)
-    d_dsigma = n / sigma - (1 + 1 / xi) * np.sum(x * xi / (sigma ** 2 + sigma * x * xi))
+    d_dxi = (1 + 1 / xi) * np.sum(y / (sigma + xi * y)) - np.sum(np.log(1 + xi * y / sigma)) * xi ** (-1 * 2)
+    d_dsigma = n / sigma - (1 + 1 / xi) * np.sum(y * xi / (sigma ** 2 + sigma * y * xi))
+    # chain rule
+    d_dbeta = d_dsigma * np.exp(beta)
 
-    jacob = np.array([d_dxi, d_dsigma])
+    jacob = np.array([d_dxi, d_dbeta])
     return jacob
 
 
@@ -197,16 +200,17 @@ def gp_neg_loglik_hess(theta, x):
     return hessian
 
 
-def fit_GPD_diff_evo(data, y_lab, x_lab):
+def fit_GPD_diff_evo(data, y_lab, x_lab, method="SLSQP"):
     """Parameter estimation by objective function minimization,
     via scipy optimizer.
-   
+
     data: pd.DataFrame of observations that includes outcome variable and covs
     y_lab: str column name of the outcome
     x_lab: list[string] or None column names of covariates
 
     returns: np.array([xi_hat, beta_1_hat, ..., beta_p+1_hat])
     """
+
     # covariate data
     data["intercept"] = 1
     X_cols = ["intercept"] + x_lab
@@ -219,24 +223,50 @@ def fit_GPD_diff_evo(data, y_lab, x_lab):
     # response vector
     y = data[y_lab].to_numpy()
     y = y.reshape(len(y), 1)
-    
-    # TODO parameterize these
-    bounds = [(-5, 1/2)] + [(-2, 2) for _ in range(p)]
 
-    # fit model using differential evolution
-    result = differential_evolution(
-        gp_nll,
-        bounds,
-        args = (y, X),
-        strategy="best1bin",
-        maxiter=1000,
-        tol=1e-6,
-        disp=False
-    )
+    # TODO parameterize these and update lower bound
+    bounds = [(-1/2, 1/2)] + [(-1, 1) for _ in range(p)]
 
-    # TODO improve this
+    if method == "SLSQP":
+        # fit model using sequential least squares
+        # TODO NEED GRADIENT WITH RESPECT TO BETA VECTOR
+
+        def jac(params, y, X):
+            """Necessary for using bounds kwarg in minimize."""
+            return gp_neg_loglik_jacob(params, y)
+
+#        theta_init = np.array([0.10 for _ in range(p + 1)])
+        # TODO TODO
+        theta_init = np.array([1/5, np.log(1)])
+        result = minimize(
+            gp_nll,
+            x0=theta_init,
+            bounds=bounds,
+            args = (y, X),
+            method=method,
+            jac=jac
+        )
+
+    elif method == "diff_evo":
+        # fit model using differential evolution
+        result = differential_evolution(
+            gp_nll,
+            bounds,
+            args = (y, X),
+            strategy="best1bin",
+            maxiter=1000,
+            tol=1e-4,
+            disp=False
+        )
+
     # # ensure optimization routine converged
-    if result.message != "Optimization terminated successfully.":
+    # come on now
+    success_message = {
+        "SLSQP": "Optimization terminated successfully",
+        "diff_evo": "Optimization terminated successfully."
+    }
+
+    if result.message != success_message[method]:
         raise RuntimeError("likelihood optimization failed: {0}".format(result.message))
 
     return result.x
