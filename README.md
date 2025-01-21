@@ -2,15 +2,21 @@
 
 ## Features
 
-This library provides Python routines for fitting the univariate Peaks-over-Threshold analysis:
+This library provides Python routines for fitting the Peaks-over-Threshold statistical models of the form:
 
 ```math
-Y_t | \xi, \sigma \sim^{iid} GPD(\xi, \sigma)
+Y_t | x_t \sim^{iid} GPD(\xi, \sigma_t)
 ```
 
-Where GPD is the Generalized Pareto Distribution with the location parameter fixed at 0.  The following functionality is available:
+Where:
 
-- Maximum likelihood and maximum product of spacings point estimation of model parameters, and asymptotic uncertainty quantification
+```math
+\sigma_t = exp(x_t^T \beta)
+```
+
+For p-dimensional parameter vector $\beta$.  GPD is the Generalized Pareto Distribution with the location parameter fixed at 0. (TODO CITE AND MOTIVATE)  The following functionality is available:
+
+- Maximum likelihood point estimation of model parameters, and asymptotic uncertainty quantification
 - Return level estimation and asymptotic uncertainty quantification
 - Statistically principled automatic threshold selection using the ForwardStop algorithm via Anderson-Darling hypothesis tests, as described by Bader et. all (2018)
 
