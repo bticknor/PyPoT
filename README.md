@@ -5,7 +5,7 @@
 This library provides Python routines for fitting the Peaks-over-Threshold statistical models of the form:
 
 ```math
-Y_t | x_t \sim^{iid} GPD(\xi, \sigma_t)
+Y_t | x_t \sim^{ind.} GPD(\xi, \sigma_t)
 ```
 
 Where:
@@ -14,7 +14,7 @@ Where:
 \sigma_t = exp(x_t^T \beta)
 ```
 
-For p-dimensional parameter vector $\beta$.  GPD is the Generalized Pareto Distribution with the location parameter fixed at 0. (TODO CITE AND MOTIVATE)  The following functionality is available:
+For p-dimensional parameter vector $\beta$.  GPD stands for the Generalized Pareto Distribution with the location parameter fixed at 0. (TODO CITE AND MOTIVATE)  The following functionality is available:
 
 - Maximum likelihood point estimation of model parameters, and asymptotic uncertainty quantification
 - Return level estimation and asymptotic uncertainty quantification
