@@ -1,33 +1,34 @@
 import numpy as np
-from scipy.optimize import LinearConstraint
 from scipy.optimize import minimize
+from scipy.optimize import differential_evolution
 from functools import partial
 
 
-def gp_neg_loglik(x, xi, sigma):
-    """Negative log likelihood of Generalized Pareto distribution
-    in the "xi, sigma" parameterization.
-
-    Args:
-        x (np.array): sample values
-        xi (numeric): xi parameter
-        sigma (numeric): sigma parameter
-
-    Returns:
-        numeric: negative log likelihood value, or nan if invalid support
+def gp_nll(params, y, X):
     """
-    n = len(x)
-    # https://stackoverflow.com/questions/49461299/how-does-scipy-minimize-handle-nans
-    # During some optimization iterations (see GPD_fit below) the optimizer will not enforce the linear
-    # support constraint, leading to negative numbers in the np.log() here.  This does not mess with the
-    # minimizer, which views nans as very large and searches away from them, effectively enforcing
-    # the constraint.  We do not want to throw warnings every time, so we ignore the warnings and let
-    # the minimizer avoid the support constraint.  If this function is called with x values that violate
-    # the support constraint, it will return np.nan.
-    with np.errstate(divide='ignore', invalid='ignore'):
-        s = sum(np.log(1 + xi * x / sigma))
-    ll = -1 * n * np.log(sigma) + (-1 - 1 / xi) * s
-    return -1 * ll
+    Negative log-likelihood for the GPD model, optionally with covariates
+
+    params: array-like, parameters to optimize [xi, beta_0, beta_1, ..., beta_p]
+    y: array-like, observed data (response variable)
+    X: array-like, design matrix for covariates (n_samples, p_features)
+    """
+    xi = params[0]  # Shape parameter
+
+    p = X.shape[1]
+    beta = params[1:].reshape((p, 1))  # Coefficients for the linear predictor
+
+    # TODO parameterize link function
+    sigma = np.exp(X @ beta)  # Scale parameter (positive by construction)
+
+    # Check the validity of the support
+    if np.any(1 + xi * y / sigma <= 0):  # Ensure the support is satisfied
+        return np.inf
+
+    # Compute the negative log-likelihood
+    term1 = np.sum(np.log(sigma))  # Scale term
+    term2 = np.sum((1 + 1 / xi) * np.log(1 + xi * y / sigma))  # Shape-dependent term
+
+    return term1 + term2
 
 
 def gp_cdf(x, xi, sigma):
@@ -45,7 +46,8 @@ def gp_cdf(x, xi, sigma):
     assert min(x) > 0
     if xi < 0:
         upper_bound = -1 * sigma / xi
-        assert max(x) < upper_bound, "observations outside of valid support"
+        if np.any(x > upper_bound):
+            raise RuntimeError("observations outside of valid support")
 
     first = (1 + xi * x / sigma)**(-1/xi)
     return 1 - first
@@ -138,26 +140,28 @@ def gp_param_cov_matrix(xi_hat, sigma_hat, n):
     return n**(-1) * cov_matrix
 
 
-
-def gp_neg_loglik_jacob(theta, x):
-    """Jacobian of the GPD negative log likelihood, used
-    in the sequential quadratic programming optimization routine.
+def gp_neg_loglik_jacob(theta, y):
+    """Jacobian of the univariate GPD negative log likelihood, can be
+    used in gradient based optimization methods.
 
     args:
-        theta (array[float]): (xi, sigma) params
+        theta (array[float]): (xi, beta) params
         x (array[float]): data
     returns:
         (array[float]) value of the jacobian
     """
     xi = theta[0]
-    sigma = theta[1]
-    n = len(x)
+    beta = theta[1]
+    sigma = np.exp(beta)
+    n = len(y)
 
     # partial derivatives
-    d_dxi = (1 + 1 / xi) * np.sum(x / (sigma + xi * x)) - np.sum(np.log(1 + xi * x / sigma)) * xi ** (-1 * 2)
-    d_dsigma = n / sigma - (1 + 1 / xi) * np.sum(x * xi / (sigma ** 2 + sigma * x * xi))
+    d_dxi = (1 + 1 / xi) * np.sum(y / (sigma + xi * y)) - np.sum(np.log(1 + xi * y / sigma)) * xi ** (-1 * 2)
+    d_dsigma = n / sigma - (1 + 1 / xi) * np.sum(y * xi / (sigma ** 2 + sigma * y * xi))
+    # chain rule
+    d_dbeta = d_dsigma * np.exp(beta)
 
-    jacob = np.array([d_dxi, d_dsigma])
+    jacob = np.array([d_dxi, d_dbeta])
     return jacob
 
 
@@ -196,79 +200,74 @@ def gp_neg_loglik_hess(theta, x):
     return hessian
 
 
-def fit_GPD(x, theta_0, f_minimize, jacobian=None):
-    """Parameter estimation by objective function minimization,
-    via scipy optimizer.
+def fit_GPD(data, y_lab, x_lab, method="SLSQP"):
+    """Parameter estimation via negative log likelihood
+    minimization.  Choice of gradient based or non gradient based
+    methods.
 
-    x: 1d np array, data values
-    theta_0: 2-tuple[float], initial guess of values
-    f_minimize: callable function with call signature:
-        f_minimize(x, xi, sigma) = r
-    jacobian: callable function with call signature:
-        jacobian([xi, sigma], x), the jacobian of the objective function
-        to minimize
+    data: pd.DataFrame of observations that includes outcome variable and covs
+    y_lab: str column name of the outcome
+    x_lab: list[string] or None column names of covariates
 
-    return: np.array[float] point estimates
+    returns: np.array([xi_hat, beta_1_hat, ..., beta_p+1_hat])
     """
-    # partially apply negative log likelihood at given X values
-    f_partial = partial(f_minimize, x=x)
+    assert method in ["SLSQP", "diff_evo"], "method must be either `SLSQP` or `diff_evo`"
 
-    # routine to optimize
-    def minimize_me(theta):
-        xi, sigma = theta
-        return f_partial(xi=xi, sigma=sigma)
+    # covariate data
+    data["intercept"] = 1
+    X_cols = ["intercept"] + x_lab
+    covariates = data[X_cols]
 
-    # bounds and constraint
-    # =========================================
-    # sigma > 0
-    # xi in a range that produces finite support
-    # TODO specify this bound on xi as an option
-    bounds = [(-1 / 2, 1 / 2), (0.01, None)]
+    # design matrix
+    X = covariates.to_numpy()
+    p = X.shape[1]
 
-    # constraint on xi
-    # xi > -sigma / max(x)
-    # --> xi + sigma / max(x) > 0
-    max_x = max(x)
+    # response vector
+    y = data[y_lab].to_numpy()
+    y = y.reshape(len(y), 1)
 
-    # scaling factor to avoid numerical precision issues
-    scale_factor = 10000
-    A = [scale_factor, scale_factor / max_x]
-    # constraint bounds - "true" lower bound will be lb / scale_factor
-    lb = 1
-    ub = float('inf')
+    # TODO parameterize these and update lower bound
+    bounds = [(-1/2, 1/2)] + [(-5, 5) for _ in range(p)]
 
-    lin_constraint = LinearConstraint(A, lb, ub)
+    if method == "SLSQP":
+        # fit model using sequential least squares
 
-    # check if jacobian is provided
-    if jacobian is not None:
-        jacob = partial(jacobian, x=x)
-    else:
-        jacob = None
+        def jac(params, y, X):
+            """Necessary for using bounds kwarg in minimize."""
+            return gp_neg_loglik_jacob(params, y)
 
-    # =========================================
-
-    result = minimize(
-        minimize_me,
-        theta_0,
-        bounds=bounds,
-        constraints=[lin_constraint],
-        method="SLSQP",
-        jac=jacob,
-    )
-    # ensure optimization routine converged
-    if result.message != "Optimization terminated successfully":
-        raise RuntimeError("optimization failed in fit_GPD: {0}".format(result.message))
-
-    # sanity checks for support - make sure the optimizer respected the constraint
-    # check this after the fact as the optimizer will not enforce the constraint at every iteration
-    # https://stackoverflow.com/questions/47682698/scipy-optimization-with-slsqp-disregards-constraints
-    xi_hat = result.x[0]
-    sigma_hat = result.x[1]
-    if xi_hat < 0:
-        upper_bound = -1 * sigma_hat / xi_hat
-        assert max_x < upper_bound, "observation {0} outside of support constraint {1}, xi_hat={2}, sigma_hat={3}".format(
-            max_x, upper_bound, xi_hat, sigma_hat
+        # initialize betas to 0
+        theta_init = np.array([1/5] + [np.log(1) for _ in range(p)])
+        result = minimize(
+            gp_nll,
+            x0=theta_init,
+            bounds=bounds,
+            args = (y, X),
+            method=method,
+            jac=jac
         )
+
+    elif method == "diff_evo":
+        # fit model using differential evolution
+        result = differential_evolution(
+            gp_nll,
+            bounds,
+            args = (y, X),
+            strategy="best1bin",
+            maxiter=1000,
+            tol=1e-4,
+            disp=False
+        )
+
+    # # ensure optimization routine converged
+    # come on now
+    success_message = {
+        "SLSQP": "Optimization terminated successfully",
+        "diff_evo": "Optimization terminated successfully."
+    }
+
+    if result.message != success_message[method]:
+        raise RuntimeError("likelihood optimization failed: {0}".format(result.message))
 
     return result.x
 
