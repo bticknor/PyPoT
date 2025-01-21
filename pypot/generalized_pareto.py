@@ -200,9 +200,10 @@ def gp_neg_loglik_hess(theta, x):
     return hessian
 
 
-def fit_GPD_diff_evo(data, y_lab, x_lab, method="SLSQP"):
-    """Parameter estimation by objective function minimization,
-    via scipy optimizer.
+def fit_GPD(data, y_lab, x_lab, method="SLSQP"):
+    """Parameter estimation via negative log likelihood
+    minimization.  Choice of gradient based or non gradient based
+    methods.
 
     data: pd.DataFrame of observations that includes outcome variable and covs
     y_lab: str column name of the outcome
@@ -210,6 +211,7 @@ def fit_GPD_diff_evo(data, y_lab, x_lab, method="SLSQP"):
 
     returns: np.array([xi_hat, beta_1_hat, ..., beta_p+1_hat])
     """
+    assert method in ["SLSQP", "diff_evo"], "method must be either `SLSQP` or `diff_evo`"
 
     # covariate data
     data["intercept"] = 1
@@ -225,19 +227,17 @@ def fit_GPD_diff_evo(data, y_lab, x_lab, method="SLSQP"):
     y = y.reshape(len(y), 1)
 
     # TODO parameterize these and update lower bound
-    bounds = [(-1/2, 1/2)] + [(-1, 1) for _ in range(p)]
+    bounds = [(-1/2, 1/2)] + [(-5, 5) for _ in range(p)]
 
     if method == "SLSQP":
         # fit model using sequential least squares
-        # TODO NEED GRADIENT WITH RESPECT TO BETA VECTOR
 
         def jac(params, y, X):
             """Necessary for using bounds kwarg in minimize."""
             return gp_neg_loglik_jacob(params, y)
 
-#        theta_init = np.array([0.10 for _ in range(p + 1)])
-        # TODO TODO
-        theta_init = np.array([1/5, np.log(1)])
+        # initialize betas to 0
+        theta_init = np.array([1/5] + [np.log(1) for _ in range(p)])
         result = minimize(
             gp_nll,
             x0=theta_init,
