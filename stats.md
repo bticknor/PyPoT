@@ -2,7 +2,7 @@
 
 ## Generalized Pareto Distribution
 
-I use the $\xi, \sigma$ parameterization of the Generalized Pareto distribution, which yields the following CDF and PDF:
+The $\xi, \sigma$ parameterization of the Generalized Pareto distribution is used, which yields the following CDF and PDF:
 
 ```math
     F_{\xi, \sigma}(x) = 1 - (1 + \xi \frac{x}{\sigma})^{-1/\xi}
@@ -16,22 +16,29 @@ Where $x \in [0, \infty)$ for $\xi \geq 0$ and $x \in [0, -\frac{\sigma}{\xi}]$ 
 
 ## Maximum Likelihood Estimators
 
-The maximum likelihood estimators minimize the GPD negative log likelihood:
+For the univariate model, the maximum likelihood estimators minimize the GPD negative log likelihood:
 
 ```math
-    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -l(\xi, \sigma | x) \\
-    -l(\xi, \sigma | x) = nlog(\sigma) + (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
+    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -\ell(\xi, \sigma | x) \\
+    -\ell(\xi, \sigma | x) = nlog(\sigma) + (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
 ```
 
-The gradient of the GPD negative log likelihood is determined by:
-
-```math
-    \frac{d}{d\xi} [-log(L(\xi, \sigma | x))] = (1 + \frac{1}{\xi}) \left(\sum_{i=1}^n \frac{x_i}{\sigma + \xi x_i}  \right) - \left( \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) \right) \cdot \frac{1}{\xi^2} 
-```
+The jacobian of which is determined by:
 
 ```math
-    \frac{d}{d\sigma} [-log(L(\xi, \sigma | x))] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{x_i \xi}{\sigma^2 + \sigma x_i \xi} \right)
+    \frac{d}{d\xi} [-\ell(\xi, \sigma | x)] = (1 + \frac{1}{\xi}) \left(\sum_{i=1}^n \frac{x_i}{\sigma + \xi x_i}  \right) - \left( \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) \right) \cdot \frac{1}{\xi^2} 
 ```
+
+```math
+    \frac{d}{d\sigma} [-\ell(\xi, \sigma | x)] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{x_i \xi}{\sigma^2 + \sigma x_i \xi} \right)
+```
+
+For the extended model with $\sigma_t = x_t^T \beta$, the element of the Jacobian corresponding to $\beta_j$ is:
+
+```math
+    \frac{d}{d\beta_j} [-\ell(\xi, \sigma | x)] = \sum_{t=1}^n x_{t,j}[1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t (1 + \xi \frac{y_t}{\sigma_t})}]
+```
+
 
 ## Maximum Product of Spacings Estimators
 
