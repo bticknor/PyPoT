@@ -114,7 +114,7 @@ https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
 
 ## Threshold Selection
 
-PyPoT includes an implementation of the goodness-of-fit based threshold selection procedure given by Bader et. all (TODO CITE).  PyPoT uses the ForwardStop algorithm with the Anderson-Darling hypothesis test, where the AD statistic is defined as:
+PyPoT includes an implementation of the goodness-of-fit based threshold selection procedure given by Bader et. all [3].  PyPoT uses the ForwardStop algorithm with the Anderson-Darling hypothesis test, where the AD statistic is defined as:
 
 ```math
     A_n^2 = -n - \frac{1}{n} \sum_{i=1}^n (2i - 1) [log(z_{(i)}) + log(1 - z_{(n + 1 - i)}) ]
@@ -135,8 +135,11 @@ P-values for this test are computed using the critical value table [here](pypot/
 For false discovery rate control $\alpha$.  See the paper for more details.
 
 
-TODO CITE:
+## Citations
 
-AUTOMATED THRESHOLD SELECTION FOR EXTREME VALUE
-ANALYSIS VIA ORDERED GOODNESS-OF-FIT TESTS WITH
-ADJUSTMENT FOR FALSE DISCOVERY RATE
+[1] TODO
+
+[2] TODO
+
+[3] Bader, Brian & Yan, Jun & Zhang, Xuebin. (2018). Automated threshold selection for extreme value analysis via ordered goodness-of-fit tests with adjustment for false discovery rate. The Annals of Applied Statistics. 12. 310-329. 10.1214/17-AOAS1092. 
+TODO CITE:
