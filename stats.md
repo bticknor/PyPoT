@@ -131,7 +131,7 @@ P-values for this test are computed using the critical value table [here](pypot/
 For false discovery rate control $\alpha$.  See [3] for more details.
 
 
-## Citations
+## References
 
 [1] Wong, T. S. T., & Li, W. K. (2006). A Note on the Estimation of Extreme Value Distributions Using Maximum Product of Spacings. Lecture Notes-Monograph Series, 52, 272-283.
 
