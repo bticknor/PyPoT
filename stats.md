@@ -5,38 +5,38 @@
 The $\xi, \sigma$ parameterization of the Generalized Pareto distribution is used, which yields the following CDF and PDF:
 
 ```math
-    F_{\xi, \sigma}(x) = 1 - (1 + \xi \frac{x}{\sigma})^{-1/\xi}
+    F_{\xi, \sigma}(y) = 1 - (1 + \xi \frac{y}{\sigma})^{-1/\xi}
 ```
 
 ```math
-    f_{\xi, \sigma}(x) = (\frac{1}{\sigma}) (1 + \xi \frac{x}{\sigma})^{-1 - \xi^{-1}}
+    f_{\xi, \sigma}(y) = (\frac{1}{\sigma}) (1 + \xi \frac{y}{\sigma})^{-1 - \xi^{-1}}
 ```
 
-Where $x \in [0, \infty)$ for $\xi \geq 0$ and $x \in [0, -\frac{\sigma}{\xi}]$ for $\xi < 0$.  The location parameter is fixed at 0, as the threshold is assumed known and subtracted from the peaks observations before inference.
+Where $y \in [0, \infty)$ for $\xi \geq 0$ and $y \in [0, -\frac{\sigma}{\xi}]$ for $\xi < 0$.  The location parameter is fixed at 0, as the threshold is assumed known and subtracted from the peaks observations before inference.
 
 ## Maximum Likelihood Estimators
 
 For the univariate model, the maximum likelihood estimators minimize the GPD negative log likelihood:
 
 ```math
-    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -\ell(\xi, \sigma | x) \\
-    -\ell(\xi, \sigma | x) = nlog(\sigma) + (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) }
+    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -\ell(\xi, \sigma | y) \\
+    -\ell(\xi, \sigma | y) = nlog(\sigma) + (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{y_i}{\sigma}) }
 ```
 
 The jacobian of which is determined by:
 
 ```math
-    \frac{d}{d\xi} [-\ell(\xi, \sigma | x)] = (1 + \frac{1}{\xi}) \left(\sum_{i=1}^n \frac{x_i}{\sigma + \xi x_i}  \right) - \left( \sum_{i=1}^n log(1 + \xi \cdot \frac{x_i}{\sigma}) \right) \cdot \frac{1}{\xi^2} 
+    \frac{d}{d\xi} [-\ell(\xi, \sigma | y)] = (1 + \frac{1}{\xi}) \left(\sum_{i=1}^n \frac{y_i}{\sigma + \xi y_i}  \right) - \left( \sum_{i=1}^n log(1 + \xi \cdot \frac{y_i}{\sigma}) \right) \cdot \frac{1}{\xi^2} 
 ```
 
 ```math
-    \frac{d}{d\sigma} [-\ell(\xi, \sigma | x)] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{x_i \xi}{\sigma^2 + \sigma x_i \xi} \right)
+    \frac{d}{d\sigma} [-\ell(\xi, \sigma | y)] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{y_i \xi}{\sigma^2 + \sigma y_i \xi} \right)
 ```
 
 For the extended model with $\sigma_t = exp(x_t^T \beta)$, the element of the Jacobian corresponding to $\beta_j$ is:
 
 ```math
-    \frac{d}{d\beta_j} [-\ell(\xi, \sigma | x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t (1 + \xi \frac{y_t}{\sigma_t})} \right)
+    \frac{d}{d\beta_j} [-\ell(\xi, \sigma | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t (1 + \xi \frac{y_t}{\sigma_t})} \right)
 ```
 
 
