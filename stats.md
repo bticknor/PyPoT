@@ -107,10 +107,7 @@ The estimate of this is computed as:
     \widehat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
 ```
 
-TODO CITE
-
-https://www.stat.cmu.edu/technometrics/80-89/VOL-29-03/v2903339.pdf
-
+For more see [2].
 
 ## Threshold Selection
 
@@ -137,9 +134,8 @@ For false discovery rate control $\alpha$.  See the paper for more details.
 
 ## Citations
 
-[1] TODO
+[1] Wong, T. S. T., & Li, W. K. (2006). A Note on the Estimation of Extreme Value Distributions Using Maximum Product of Spacings. Lecture Notes-Monograph Series, 52, 272-283.
 
-[2] TODO
+[2] Hosking, J.R. and Wallis, J.R. (1987) Parameter and Quantile Estimation for the Generalized Pareto Distribution. Technometrics, 29, 339-349.
 
-[3] Bader, Brian & Yan, Jun & Zhang, Xuebin. (2018). Automated threshold selection for extreme value analysis via ordered goodness-of-fit tests with adjustment for false discovery rate. The Annals of Applied Statistics. 12. 310-329. 10.1214/17-AOAS1092. 
-TODO CITE:
+[3] Bader, Brian & Yan, Jun & Zhang, Xuebin. (2018). Automated threshold selection for extreme value analysis via ordered goodness-of-fit tests with adjustment for false discovery rate. The Annals of Applied Statistics. 12. 310-329. 10.1214/17-AOAS1092.
