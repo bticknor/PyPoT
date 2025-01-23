@@ -45,16 +45,16 @@ For the extended model with $\sigma_t = exp(x_t^T \beta)$, the element of the Ja
 The maximum product of spacings estimators minimize the "Moran's statistic":
 
 ```math
-    \displaylines{ (\tilde{\xi}, \tilde{\sigma}) = argmin_{\xi, \sigma}  M(\xi, \sigma | x) \\ 
-    M(\xi, \sigma | x) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(x_{(i)}) - F_{\xi, \sigma}( x_{(i-1)}  \right) }
+    \displaylines{ (\tilde{\xi}, \tilde{\sigma}) = argmin_{\xi, \sigma}  M(\xi, \sigma | y) \\ 
+    M(\xi, \sigma | y) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(y_{(i)}) - F_{\xi, \sigma}( y_{(i-1)}  \right) }
 ```
 
-Where $x_{(i)}$ is the $i$'th element in the ordered sample, with $x_0 \equiv 0$, and $x_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency (TODO CITE https://arxiv.org/pdf/math/0702830
+Where $y_{(i)}$ is the $i$'th element in the ordered sample, with $y_0 \equiv 0$, and $y_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency (TODO CITE https://arxiv.org/pdf/math/0702830
 ).
 
 ## Poisson Process Parameter Estimator
 
-The MLE for the parameter governing the Poisson process that generates exceedences is given by:
+The MLE for the parameter governing the Poisson process that generates exceedences in the PoT model is given by:
 
 ```math
     \hat{\lambda} = \frac{N(T)}{T}
@@ -123,7 +123,7 @@ PyPoT includes an implementation of the goodness-of-fit based threshold selectio
 Where:
 
 ```math
-    z_{(i)} = F_{\xi, \sigma}(x_{(i)})
+    z_{(i)} = F_{\hat{\xi}, \hat{\sigma}}(y_{(i)})
 ```
 
 P-values for this test are computed using the critical value table [here](pypot/data/ADQuantiles.csv).  This critical value table and code for interpolating between values is translated directly from [here](https://github.com/brianbader/eva_package/tree/master).  The ForwardStop algorithm chooses from $l$ ordered hypothesis tests using the logic:
