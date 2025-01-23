@@ -49,7 +49,7 @@ The maximum product of spacings estimators minimize the "Moran's statistic":
     M(\xi, \sigma | y) = - \sum_{i=1}^{n+1} log \left(  F_{\xi, \sigma}(y_{(i)}) - F_{\xi, \sigma}( y_{(i-1)}  \right) }
 ```
 
-Where $y_{(i)}$ is the $i$'th element in the ordered sample, with $y_0 \equiv 0$, and $y_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency (TODO CITE https://arxiv.org/pdf/math/0702830
+Where $y_{(i)}$ is the $i$'th element in the ordered sample, with $y_0 \equiv 0$, and $y_{(n+1)} \equiv 1$.  MPS estimators have the same asymptotic properties as the MLEs (when the MLEs exist), e.g. asymptotic efficiency [1].
 ).
 
 ## Poisson Process Parameter Estimator
