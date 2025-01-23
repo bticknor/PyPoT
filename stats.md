@@ -36,7 +36,7 @@ The jacobian of which is determined by:
 For the extended model with $\sigma_t = exp(x_t^T \beta)$, the element of the Jacobian corresponding to $\beta_j$ is:
 
 ```math
-    \frac{d}{d\beta_j} [-\ell(\xi, \sigma | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t (1 + \xi \frac{y_t}{\sigma_t})} \right)
+    \frac{d}{d\beta_j} [-\ell(\xi, \beta | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t (1 + \xi \frac{y_t}{\sigma_t})} \right)
 ```
 
 
@@ -70,7 +70,7 @@ An estimator for the $L$ year return level is:
     \widehat{R(L | \hat{\theta})} = \frac{\hat{\sigma}}{\hat{\xi}} \left((\hat{\lambda} L)^{\hat{\xi}} - 1   \right)
 ```
 
-This is derived from computing the expected time between $L$ year exceedences, given GPD parameter estimates. TODO CITE OUR PAPER
+This is derived from computing the expected time between $L$ year exceedences, given GPD parameter estimates.
 
 
 ## Approximate Variance for MLE/MPS Estimators and Return Level Estimator
@@ -129,7 +129,7 @@ P-values for this test are computed using the critical value table [here](pypot/
     \hat{k}_F = max \Biggl\{ k \in \{1, ..., l\}: \; -\frac{1}{k} \sum_{i=1}^k log(1 - p_i) \leq \alpha \Biggr\}
 ```
 
-For false discovery rate control $\alpha$.  See the paper for more details.
+For false discovery rate control $\alpha$.  See [3] for more details.
 
 
 ## Citations
