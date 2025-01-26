@@ -16,7 +16,7 @@ def fetch_adquantiles_table():
 
 def fetch_example_dataset():
     """Fetches example dataset for use in examples."""
-    sc_swells = pkgutil.get_data("pypot", "data/sc_swh_dataset.p")
+    sc_swells = pkgutil.get_data("pypot", "data/example_dataset.p")
     swell_dataset = pickle.loads(sc_swells)
     return swell_dataset
 
