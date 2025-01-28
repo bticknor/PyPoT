@@ -1,0 +1,25 @@
+package:
+  name: pypot
+  version: "1.0.1"
+
+source:
+  path: ../pypot  # Path to your source code
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - numpy  # Example dependency
+    - pandas
+    - scipy
+
+about:
+  home: https://github.com/btcknor/PyPoT
+  license: MIT
+  summary: "Peaks over threshold modelling in Python."
