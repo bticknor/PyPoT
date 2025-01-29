@@ -24,9 +24,15 @@ This is a statistical library with a very limited scope. Routines for visualizin
 
 ## Installation
 
-Clone the repository, navigate to the root directory, and run:
+To install via `pip` - clone the repository, navigate to the root directory, and run:
 
 `pip install .`
+
+To install via `conda` - clone the repository, naviate to the root directory, and run the following commands:
+
+`conda-build conda-recipe`
+
+`conda install --use-local mypackage`
 
 ## Documentation
 
