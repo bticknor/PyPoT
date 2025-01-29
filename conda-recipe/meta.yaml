@@ -3,7 +3,7 @@ package:
   version: "1.0.1"
 
 source:
-  path: ../pypot  # Path to your source code
+  path: ..  # Path to your source code
 
 build:
   number: 0
