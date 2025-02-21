@@ -33,11 +33,10 @@ The jacobian of which is determined by:
     \frac{d}{d\sigma} [-\ell(\xi, \sigma | y)] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{y_i \xi}{\sigma^2 + \sigma y_i \xi} \right)
 ```
 
-For the extended model with $\sigma_t = exp(x_t^T \beta)$, the element of the Jacobian corresponding to $\beta_j$ is:
+For the extended model with $\sigma_t = exp(x_t^T \beta)$, the gradient of the negative log likelihood with respect to $\beta_j$ is given by:
 
 ```math
-    \frac{d}{d\beta_j} [-\ell(\xi, \beta | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t + \xi y_t} \right) \\
-    \implies \frac{d^2}{d \beta_j^2} [-\ell(\xi, \beta | y,x)] = (1 - \frac{1}{\xi}) \sum_{t=1}^n \frac{\xi y_t}{(\sigma_t + \xi y_t)^2} \sigma_t x_{t,j}
+    \frac{d}{d\beta_j} [-\ell(\xi, \beta | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t + \xi y_t} \right)
 ```
 
 
@@ -107,7 +106,20 @@ The estimate of this is computed as:
     \widehat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
 ```
 
-For more see [2].
+For more see [2].  For $\beta_j$, we have:
+
+```math
+    \frac{d^2}{d \beta_j^2} [-\ell(\xi, \beta | y,x)] = (1 - \frac{1}{\xi}) \sum_{t=1}^n \frac{\xi y_t}{(\sigma_t + \xi y_t)^2} \sigma_t x_{t,j}
+```
+
+Which implies that the observed Fisher information for $\beta_j$ is given by:
+
+```math
+    J(\hat{\beta}_j) = (1 - \frac{1}{\hat{\xi}}) \sum_{t=1}^n \frac{\hat{\xi} y_t}{(\hat{\sigma}_t + \hat{\xi} y_t)^2} \hat{\sigma}_t x_{t,j}
+```
+
+And the variance of $\hat{\beta}_j$ approximated via $J(\hat{\beta}_j)^{-1}$.
+
 
 ## Threshold Selection
 
