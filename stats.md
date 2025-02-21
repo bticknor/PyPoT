@@ -36,7 +36,7 @@ The jacobian of which is determined by:
 For the extended model with $\sigma_t = exp(x_t^T \beta)$, the element of the Jacobian corresponding to $\beta_j$ is:
 
 ```math
-    \frac{d}{d\beta_j} [-\ell(\xi, \beta | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t + \xi y_t})} \right)
+    \frac{d}{d\beta_j} [-\ell(\xi, \beta | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t + \xi y_t} \right)
 ```
 
 
