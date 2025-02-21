@@ -296,3 +296,38 @@ def anderson_darling_statistic(x, xi, sigma):
     # sum term
     s = np.sum(coeff * (np.log(cdf_vals_samp) + np.log(1 - cdf_vals_desc)))
     return -1 * n - s/n
+
+
+def beta_obs_fisher_info(y, X, theta_hat):
+    """Observed fisher information for beta parameters.
+    
+    args:
+        X (np.array): matrix of covariate values
+        y (np.array): observation vector
+        theta_hat (np.array): MLE (xi_hat, beta_1_hat, ..., beta_p+1_hat)
+    
+    TODO TEST THIS!
+    """
+    xi_hat = theta_hat[0]
+    beta_hat = theta_hat[1:]
+    # make this a column vector
+    beta_hat = beta_hat.reshape(1, -1).T
+
+    # vector of sigma hats
+    sigma_hat_t = np.exp(X @ beta_hat)
+
+    # reshape y into column vector
+    y = y.reshape(1, -1).T
+
+    # element wise multiplications here
+    num = xi_hat * y * sigma_hat_t
+    denom = (sigma_hat_t + xi_hat * y)**2
+
+    c = 1 - 1 / xi_hat
+    C_t = num / denom
+
+    # observed Fisher information
+    J = c * X.T @ C_t
+
+    # reshape back into 1d array
+    return J.reshape(-1)
