@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
 from scipy.optimize import differential_evolution
-from functools import partial
 
 
 def gp_nll(params, y, X):
