@@ -232,9 +232,14 @@ def fit_GPD(data, y_lab, x_lab, method="SLSQP"):
     if method == "SLSQP":
         # fit model using sequential least squares
 
-        def jac(params, y, X):
-            """Necessary for using bounds kwarg in minimize."""
-            return gp_neg_loglik_jacob(params, y)
+        # TODO! implement jacobian for p>1
+        if p > 1:
+            jac = None
+
+        else:
+            def jac(params, y, X):
+                """Necessary for using bounds kwarg in minimize."""
+                return gp_neg_loglik_jacob(params, y)
 
         # initialize betas to 0
         theta_init = np.array([1/5] + [np.log(1) for _ in range(p)])
