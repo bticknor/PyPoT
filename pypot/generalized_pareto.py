@@ -305,13 +305,14 @@ def anderson_darling_statistic(x, xi, sigma):
 
 def beta_obs_fisher_info(y, X, theta_hat):
     """Observed fisher information for beta parameters.
-    
+
     args:
         X (np.array): matrix of covariate values
         y (np.array): observation vector
         theta_hat (np.array): MLE (xi_hat, beta_1_hat, ..., beta_p+1_hat)
     
-    TODO TEST THIS!
+    returns:
+        np.array([float]) array of observed Fisher information values
     """
     xi_hat = theta_hat[0]
     beta_hat = theta_hat[1:]
@@ -324,15 +325,16 @@ def beta_obs_fisher_info(y, X, theta_hat):
     # reshape y into column vector
     y = y.reshape(1, -1).T
 
+    c = 1 + 1 / xi_hat
+
     # element wise multiplications here
     num = xi_hat * y * sigma_hat_t
     denom = (sigma_hat_t + xi_hat * y)**2
-
-    c = 1 - 1 / xi_hat
     C_t = num / denom
 
+    X_sq = X ** 2
     # observed Fisher information
-    J = c * X.T @ C_t
+    J = c * X_sq.T @ C_t
 
     # reshape back into 1d array
     return J.reshape(-1)
