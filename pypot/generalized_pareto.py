@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
 from scipy.optimize import differential_evolution
-from functools import partial
 
 
 def gp_nll(params, y, X):
@@ -140,33 +139,44 @@ def gp_param_cov_matrix(xi_hat, sigma_hat, n):
     return n**(-1) * cov_matrix
 
 
-def gp_neg_loglik_jacob(theta, y):
+def gp_neg_loglik_jacob(theta, y, X):
     """Jacobian of the univariate GPD negative log likelihood, can be
     used in gradient based optimization methods.
 
     args:
         theta (array[float]): (xi, beta) params
-        x (array[float]): data
+        y (array[float]): observations
+        X np.array: covariate values with intercept as first column
     returns:
         (array[float]) value of the jacobian
     """
     xi = theta[0]
-    beta = theta[1]
-    sigma = np.exp(beta)
+    # make column vector
+    beta = theta[1:].reshape(1, -1).T
+    sigma_t = np.exp(X @ beta)
     n = len(y)
+    # make column vector
+    y = y.reshape(1, -1).T
 
-    # partial derivatives
-    d_dxi = (1 + 1 / xi) * np.sum(y / (sigma + xi * y)) - np.sum(np.log(1 + xi * y / sigma)) * xi ** (-1 * 2)
-    d_dsigma = n / sigma - (1 + 1 / xi) * np.sum(y * xi / (sigma ** 2 + sigma * y * xi))
-    # chain rule
-    d_dbeta = d_dsigma * np.exp(beta)
+    d_dxi = (1 + 1 / xi) * np.sum(y / (sigma_t + xi * y)) - np.sum(np.log(1 + xi * y / sigma_t)) * xi ** (-2)
 
-    jacob = np.array([d_dxi, d_dbeta])
+    # element wise operations here    
+    c_1 = xi * y / (sigma_t + xi * y)
+    # sum_{t=1}^n x_{t,j}
+    c_2 = np.sum(X.T, axis=1).reshape(1, -1).T
+    c_3 = (1 + 1 / xi) * c_1
+    # j x 1
+    d_dbeta = c_2 - X.T @ c_3
+
+    jacob = np.concatenate(([d_dxi], d_dbeta.reshape(-1)))
     return jacob
 
 
 def gp_neg_loglik_hess(theta, x):
-    """Hessian of the GPD negative log likelihood, for use in
+    """
+    TODO THIS IS NOT UP TO DATE WITH THE NEW MODEL
+
+    Hessian of the GPD negative log likelihood, for use in
     optimization procedures that require it.
 
     args:
@@ -232,10 +242,6 @@ def fit_GPD(data, y_lab, x_lab, method="SLSQP"):
     if method == "SLSQP":
         # fit model using sequential least squares
 
-        def jac(params, y, X):
-            """Necessary for using bounds kwarg in minimize."""
-            return gp_neg_loglik_jacob(params, y)
-
         # initialize betas to 0
         theta_init = np.array([1/5] + [np.log(1) for _ in range(p)])
         result = minimize(
@@ -244,7 +250,7 @@ def fit_GPD(data, y_lab, x_lab, method="SLSQP"):
             bounds=bounds,
             args = (y, X),
             method=method,
-            jac=jac
+            jac=gp_neg_loglik_jacob
         )
 
     elif method == "diff_evo":
@@ -296,3 +302,40 @@ def anderson_darling_statistic(x, xi, sigma):
     # sum term
     s = np.sum(coeff * (np.log(cdf_vals_samp) + np.log(1 - cdf_vals_desc)))
     return -1 * n - s/n
+
+
+def beta_obs_fisher_info(y, X, theta_hat):
+    """Observed fisher information for beta parameters.
+
+    args:
+        X (np.array): matrix of covariate values
+        y (np.array): observation vector
+        theta_hat (np.array): MLE (xi_hat, beta_1_hat, ..., beta_p+1_hat)
+    
+    returns:
+        np.array([float]) array of observed Fisher information values
+    """
+    xi_hat = theta_hat[0]
+    beta_hat = theta_hat[1:]
+    # make this a column vector
+    beta_hat = beta_hat.reshape(1, -1).T
+
+    # vector of sigma hats
+    sigma_hat_t = np.exp(X @ beta_hat)
+
+    # reshape y into column vector
+    y = y.reshape(1, -1).T
+
+    c = 1 + 1 / xi_hat
+
+    # element wise multiplications here
+    num = xi_hat * y * sigma_hat_t
+    denom = (sigma_hat_t + xi_hat * y)**2
+    C_t = num / denom
+
+    X_sq = X ** 2
+    # observed Fisher information
+    J = c * X_sq.T @ C_t
+
+    # reshape back into 1d array
+    return J.reshape(-1)

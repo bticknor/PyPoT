@@ -16,27 +16,26 @@ Where $y \in [0, \infty)$ for $\xi \geq 0$ and $y \in [0, -\frac{\sigma}{\xi}]$ 
 
 ## Maximum Likelihood Estimators
 
-For the univariate model, the maximum likelihood estimators minimize the GPD negative log likelihood:
+For the general model with $\sigma_t = exp(x_t^T \beta)$, the maximum likelihood estimators minimize the negative log likelihood of the GPD model:
+
 
 ```math
-    \displaylines{ (\hat{\xi}, \hat{\sigma}) = argmin_{\xi, \sigma}  -\ell(\xi, \sigma | y) \\
-    -\ell(\xi, \sigma | y) = nlog(\sigma) + (1 + \frac{1}{\xi}) \sum_{i=1}^n log(1 + \xi \cdot \frac{y_i}{\sigma}) }
+    \displaylines{ (\hat{\xi}, \hat{\beta}) = argmin_{\xi, \sigma_t}  -\ell(\xi, \sigma_t | y) \\
+    -\ell(\xi, \sigma_t | y) = \sum_{t=1}^n log(\sigma_t) + (1 + \frac{1}{\xi}) log(1 + \xi \cdot \frac{y_t}{\sigma_t}) }
 ```
 
-The jacobian of which is determined by:
+The partial derivatives with respect the the parameters are:
 
 ```math
-    \frac{d}{d\xi} [-\ell(\xi, \sigma | y)] = (1 + \frac{1}{\xi}) \left(\sum_{i=1}^n \frac{y_i}{\sigma + \xi y_i}  \right) - \left( \sum_{i=1}^n log(1 + \xi \cdot \frac{y_i}{\sigma}) \right) \cdot \frac{1}{\xi^2} 
+    \frac{d}{d\xi} [-\ell(\xi, \sigma_t | y)] = (1 + \frac{1}{\xi}) \left(\sum_{t=1}^n \frac{y_t}{\sigma_t + \xi y_t}  \right) - \left( \sum_{t=1}^n log(1 + \xi \cdot \frac{y_t}{\sigma_t}) \right) \cdot \frac{1}{\xi^2} 
 ```
 
 ```math
-    \frac{d}{d\sigma} [-\ell(\xi, \sigma | y)] = \frac{n}{\sigma} - (1 + \frac{1}{\xi}) \left( \sum_{i=1}^n \frac{y_i \xi}{\sigma^2 + \sigma y_i \xi} \right)
+    \frac{d}{d\sigma_t} [-\ell(\xi, \sigma_t | y)] = \sum_{t=1}^n \frac{1}{\sigma_t} - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t(\sigma_t + \xi y_t)}
 ```
 
-For the extended model with $\sigma_t = exp(x_t^T \beta)$, the element of the Jacobian corresponding to $\beta_j$ is:
-
 ```math
-    \frac{d}{d\beta_j} [-\ell(\xi, \beta | y,x)] = \sum_{t=1}^n x_{t,j}\left( 1 - (1 + \frac{1}{\xi}) \frac{\xi y_t}{\sigma_t (1 + \xi \frac{y_t}{\sigma_t})} \right)
+    \frac{d}{d\beta_j} [-\ell(\xi, \sigma_t | y)] = \sum_{t=1}^n x_{t,j} - (1 + \frac{1}{\xi}) \left( \frac{\xi y_t x_{t,j}}{\sigma_t + \xi y_t} \right)
 ```
 
 
@@ -106,7 +105,20 @@ The estimate of this is computed as:
     \widehat{Var}(\widehat{R(L)}) = \nabla h(\theta)^T \cdot  \Sigma \cdot \nabla h(\theta)|_{\theta = \hat{\theta}}
 ```
 
-For more see [2].
+For more see [2].  For $\beta_j$, we have:
+
+```math
+    \frac{d^2}{d \beta_j^2} [-\ell(\xi, \beta | y)] = \sum_{t=1}^n (1 + \frac{1}{\xi}) \left( \frac{\xi y_t}{(\sigma_t + \xi y_t)^2} \right) x_{t,j}^2 \sigma_t
+```
+
+Which implies that the observed Fisher information for $\beta_j$ is given by:
+
+```math
+    J(\hat{\beta}_j) = \sum_{t=1}^n (1 + \frac{1}{\hat{\xi}}) \left( \frac{\hat{\xi} y_t}{(\hat{\sigma}_t + \hat{\xi} y_t)^2} \right) x_{t,j}^2 \hat{\sigma}_t
+```
+
+The standard errors of $\hat{\beta}_j$ are approximated via $J(\hat{\beta}_j)^{-1/2}$.
+
 
 ## Threshold Selection
 
