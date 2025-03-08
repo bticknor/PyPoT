@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='pypot',
-    version='1.1.0',
+    version='1.1.1',
     packages=find_packages(),
     install_requires=requirements,
     include_package_data=True,
