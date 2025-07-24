@@ -78,8 +78,8 @@ Letting $\theta = (\lambda, \xi, \sigma)$ and assuming independence between $\la
 ```math
     cov(\hat{\theta}) \equiv \Sigma = \begin{bmatrix}
         \frac{\lambda}{T} & 0 & 0 \\
-        0 & \frac{(1 - \xi^2)}{N(T)} & \frac{-\sigma(1 + \xi)}{N(T)} \\
-        0 & \frac{-\sigma(1 + \xi)}{N(T)} & \frac{2 \sigma^2 (1 + \xi)}{N(T)}
+        0 & \frac{(1 + \xi)^2}{N(T)} & \frac{\sigma(1 + \xi)}{N(T)} \\
+        0 & \frac{\sigma(1 + \xi)}{N(T)} & \frac{2 \sigma^2 (1 + \xi)}{N(T)}
     \end{bmatrix}
 ```
 

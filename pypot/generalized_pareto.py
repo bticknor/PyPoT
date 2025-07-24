@@ -126,10 +126,10 @@ def gp_param_cov_matrix(xi_hat, sigma_hat, n):
         (2d np.array): covariance matrix
     """
     # unnormalized estimated asymptotic variances
-    var_xi_hat = (1 - xi_hat**2)
+    var_xi_hat = (1 + xi_hat)**2
     var_sigma_hat = 2 * sigma_hat **2 * (1 + xi_hat)
     # unnormalized estimated asymptotic covariance
-    cov_xi_sigma_hat = -1 * sigma_hat * (1 + xi_hat)
+    cov_xi_sigma_hat = sigma_hat * (1 + xi_hat)
     # unnormalized cov matrix
     cov_matrix = np.array([
         [var_xi_hat, cov_xi_sigma_hat],
