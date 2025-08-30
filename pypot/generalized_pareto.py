@@ -53,10 +53,12 @@ def gp_cdf(x, xi, sigma):
 
 
 def gp_inv_cdf(u, xi, sigma):
-    """Inverse CDF of the GPD as paramaterized by the paper above."""
-    first = (1 - u)**(-1 * xi) - 1
-    second = sigma / xi * first
-    return second
+    """Inverse CDF of the GPD with support for xi = 0."""
+    u = np.asarray(u)  # ensure works with vectors
+    if np.isclose(xi, 0.0):
+        return -sigma * np.log(1 - u)
+    else:
+        return (sigma / xi) * ((1 - u) ** (-xi) - 1)
 
 
 def gp_density(x, xi, sigma):
