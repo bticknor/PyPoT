@@ -296,6 +296,11 @@ def anderson_darling_statistic(x, xi, sigma):
     x = np.sort(x)
     # compute cdf values at sample points
     cdf_vals_samp = gp_cdf(x, xi, sigma)
+
+    # clip values for numerical reasons
+    eps = np.finfo(float).eps
+    cdf_vals_samp = np.clip(cdf_vals_samp, eps, 1.0 - eps)
+
     # reverse the cdf vals
     # i.e. (z(1), z(2), ... z(n)) -> (z(n), z(n-1), ... z(1))
     cdf_vals_desc = cdf_vals_samp[::-1]
