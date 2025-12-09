@@ -141,17 +141,20 @@ def run_AD_tests(data, y_lab, thresh_down, thresh_up, l, r):
     returns:
         (tuple[np.array]): threshold, p_value, xi_hat, and sigma_hat for each test
     """
-    assert thresh_down < thresh_up, "lower threshold bound must be below upper threshold bound"
+    # quantiles table for p value approximation
+    adq_frame = fetch_adquantiles_table()
 
-    # threshold grid
-    thresholds = np.linspace(thresh_down, thresh_up, l)
+    if thresh_down == thresh_up:
+        # if interval is empty, just use 99% quantile as threshold
+        thresholds = thresh_down
+
+    else:
+        # else we search over a grid threshold grid
+        thresholds = np.linspace(thresh_down, thresh_up, l)
 
     p_vals = np.zeros(len(thresholds))
     xi_hats = np.zeros(len(thresholds))
     sigma_hats = np.zeros(len(thresholds))
-
-    # quantiles table for p value approximation
-    adq_frame = fetch_adquantiles_table()
 
     # loop through thresholds to test
     for i, cand_threshold in enumerate(thresholds):
@@ -218,9 +221,14 @@ def forward_stop_u_selection(data, y_lab, thresh_down, thresh_up, l, r, alpha=0.
     # forward stop algorithm
     adjusted_p_vals = forward_stop_adjusted_p(p_vals)
 
+    # if we have essentially pre-set the threshold since q99 = q999
+    if len(adjusted_p_vals) == 1:
+        threshold_selection_index=0
+
     # if all adjusted p-vals greater than alpha, use the lowest threshold
-    if min(adjusted_p_vals) > alpha:
+    elif min(adjusted_p_vals) > alpha:
         threshold_selection_index = 0
+
     # if no adjusted p-vals greater than alpha
     # maximum index is used
     elif max(adjusted_p_vals) < alpha:
