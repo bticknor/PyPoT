@@ -146,7 +146,7 @@ def run_AD_tests(data, y_lab, thresh_down, thresh_up, l, r):
 
     if thresh_down == thresh_up:
         # if interval is empty, just use 99% quantile as threshold
-        thresholds = thresh_down
+        thresholds = np.array([thresh_down])
 
     else:
         # else we search over a grid threshold grid
